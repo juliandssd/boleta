@@ -1,0 +1,14 @@
+html, body {
+    height: 100%;
+  }
+
+
+  #root {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  footer {
+    margin-top: auto; /* Hace que el footer se mantenga al fondo de la página */
+  }

@@ -1,0 +1,25 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <!-- Escenario -->
+  <rect x="300" y="50" width="200" height="100" fill="#666" stroke="black" stroke-width="2" />
+  <text x="400" y="120" text-anchor="middle" fill="white" font-size="20">Escenario</text>
+
+  <!-- Palco VIP (circulo) -->
+  <circle id="VIP" cx="200" cy="300" r="50" fill="#00E676" stroke="black" stroke-width="2" />
+  <text x="200" y="305" text-anchor="middle" fill="black" font-size="16">VIP</text>
+
+  <!-- Palco Izquierdo -->
+  <rect id="PALCO1" x="100" y="200" width="80" height="80" fill="#FF1744" stroke="black" stroke-width="2" />
+  <text x="140" y="240" text-anchor="middle" fill="white" font-size="14">Palco 1</text>
+
+  <!-- Palco Derecho -->
+  <rect id="PALCO2" x="600" y="200" width="80" height="80" fill="#00B0FF" stroke="black" stroke-width="2" />
+  <text x="640" y="240" text-anchor="middle" fill="white" font-size="14">Palco 2</text>
+
+  <!-- Zona General -->
+  <rect id="GENERAL_IZQ" x="100" y="400" width="150" height="80" fill="#FFA726" stroke="black" stroke-width="2" />
+  <text x="175" y="440" text-anchor="middle" fill="black" font-size="14">General Izquierda</text>
+
+  <rect id="GENERAL_DER" x="550" y="400" width="150" height="80" fill="#FFA726" stroke="black" stroke-width="2" />
+  <text x="625" y="440" text-anchor="middle" fill="black" font-size="14">General Derecha</text>
+</svg>
