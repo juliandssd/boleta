@@ -37,4 +37,9 @@ export const infoeventoinsertarpordefault= async (data)=>
     await axios.post(`${ip}/api/infodefault/insertar`,data);
 
 
+export const CategorymostrarporIDvento= async (id)=>
+    await axios.get(`${ip}/api/categoy/mostrar/porid_vento/categoria/${id}`);
+
+
+
 

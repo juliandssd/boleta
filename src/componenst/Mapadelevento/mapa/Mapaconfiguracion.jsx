@@ -4,7 +4,7 @@ import PanZoom from 'react-easy-panzoom';
 import styled from 'styled-components';
 import { posicionesmostrar } from '../../../api/Taskposiciones';
 
-import { useConciertoStore, usedatamapa, useImageStore, usemovimiento, useselectgloabal, useVisibilityStore } from '../../../useUserStore';
+import { useColorCordenada, useConciertoStore, usedatamapa, useImageStore, usemovimiento, useselectgloabal, useSelectGlobal, useVisibilityStore } from '../../../useUserStore';
 
 import Fpalcos from './Datosdepalco';
 import Tooltip from './CartelAnuncioTooltip';
@@ -77,7 +77,9 @@ const useImages = (items) => {
 const SeatMapConfiguration = ({objects}) => {
 
   const [isFpalco,setisFpalco]=useState(false);
-  const { setSelectedObjectId, selectedObjectId } = useselectgloabal();
+  const { 
+    setSelectedObjectId
+  } = useSelectGlobal();
   const imagesglobal = useImageStore((state) => state.images);
   const [linkimagen,setlinkimagen]=useState('');
   const {setdatamapaconfigurar}=usedatamapa();
@@ -92,6 +94,7 @@ const SeatMapConfiguration = ({objects}) => {
   const isDraggable = usemovimiento((state) => state.isDraggable);
   const [selectedShapeId, setSelectedShapeId] = useState(null);
   const transformerRef = useRef(null);
+  const { setCoordinates } = useColorCordenada();
   const imageRefs = useRef({});
   useEffect(() => {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -145,7 +148,12 @@ const SeatMapConfiguration = ({objects}) => {
       _id_: conciertoId,
       url: imagesData.find(img => img.id === id)?.url || '' // Asegurarnos que url esté definido
     };
-  
+    const newX = Math.round(node.x());
+    const newY = Math.round(node.y());
+    setCoordinates({
+      x: newX.toString(),
+      y: newY.toString()
+    });
     // Resetear la escala
     node.scaleX(1);
     node.scaleY(1);
@@ -164,13 +172,6 @@ const SeatMapConfiguration = ({objects}) => {
       )
     );
   };
-  
-
-    
-    
-      
-
-
       const handledabrir=(id,link)=>{
         if (isDraggable==false) {
           setid_posicionespalco(id);
@@ -200,7 +201,7 @@ const SeatMapConfiguration = ({objects}) => {
 
       const handleImageClick = (id) => {
         setSelectedShapeId(id);
-
+        setSelectedObjectId(id);
         const selectedNode = imageRefs.current[id]; // Obtén el nodo seleccionado
       
         if (isDraggable && selectedNode) {

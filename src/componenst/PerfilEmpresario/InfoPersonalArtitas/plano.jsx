@@ -1,4 +1,4 @@
-import React, { useState , useEffect  } from 'react';
+import React, { useState , useEffect, useRef  } from 'react';
 import styled from 'styled-components';
 import { planoinsertarimagenes,planomostrarporid_evento } from '../../../api/TaskEvento';
 
@@ -88,6 +88,8 @@ const ImageUploadComponent = ({event}) => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
   const [imagenes, setImagenes] = useState([]);
+  const timeoutRef = useRef(null);
+  const isFirstRender = useRef(true);
 
   // Maneja el cambio de archivo cuando se selecciona una imagen
   const handleImageChange = (e) => {
@@ -131,18 +133,36 @@ const ImageUploadComponent = ({event}) => {
     // Aquí puedes manejar el envío de la imagen a tu servidor
   };
 
-  const imgmostrar = async ()=>{
-  try {
-    const response = await planomostrarporid_evento(event.id_eventos);
-    setImagenes(response.data);
-  } catch (error) {
-    
-  }
-}
-useEffect(()=>{
+  const imgmostrar = async () => {
+    try {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
 
-imgmostrar();
-},[])
+      timeoutRef.current = setTimeout(async () => {
+        const response = await planomostrarporid_evento(event.id_eventos);
+        setImagenes(response.data);
+      }, 500); // Espera 500ms antes de hacer la petición
+    } catch (error) {
+      console.error('Error al cargar las imágenes:', error);
+    }
+  };
+useEffect(() => {
+    // Evita la primera ejecución si es necesario
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (!event.id_eventos) return; // No ejecutar si no hay ID
+    }
+
+    imgmostrar();
+
+    // Cleanup function
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [event.id_eventos]);
 
   return (
     <UploadContainer>

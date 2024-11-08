@@ -183,8 +183,7 @@ const ErrorContainer = styled.div`
   margin: 2rem auto;
 `;
 
-const PricingCards = () => {
-  const { conciertoId } = useConciertoStore();
+const PricingCards = ({id}) => {
   const [datos, setDatos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -194,8 +193,7 @@ const PricingCards = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await palcomostrarcliente(conciertoId);
-        console.log(response.data);
+        const response = await palcomostrarcliente(id);
         if (!response.data || response.data.length === 0) {
           setError('No se encontraron localidades disponibles');
           return;
@@ -210,10 +208,10 @@ const PricingCards = () => {
       }
     };
 
-    if (conciertoId) {
+    if (id) {
       fetchData();
     }
-  }, [conciertoId]);
+  }, [id]);
 
   const handleCardClick = (item) => {
     if (item.estado === 'LIBRE') {

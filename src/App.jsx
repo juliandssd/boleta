@@ -12,6 +12,10 @@ import PaymentHomePage from './componenst/Detalledelpago/principal/PrincipalDeta
 import { useStoreEncryp } from './useUserStore';
 import ProtectedRoute from './ProtectedRoute';
 import VerificacionCodigo from './componenst/login/Verificarnumero';
+import PaginaPago from './componenst/wompi/Tarjeta/WompiPaymentForm';
+import PSE from './componenst/wompi/Pse/PSE';
+import WompiBancolombiaPayment from './componenst/wompi/Corresponsal/WompiBancolombiaPayment';
+
 function App() {
   return (
     <Router>
@@ -25,6 +29,9 @@ function App() {
           <Route path='/perfilempresario' element={<LoginForm/>}/>
           <Route path='/empresario/editar/info' element={<PerfilEmpresario/>}/>
           <Route path='/verify/number' element={<VerificacionCodigo/>}/>
+          <Route path='/pagos' element={<PaginaPago/>}/>
+          <Route path='/pagos/pse' element={<PSE/>}/>
+          <Route path='/pagos/bancolombia' element={<WompiBancolombiaPayment/>}/>
           {/* Ruta protegida */}
           <Route 
             path='/detalle/pago' 

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt, faCalendarAlt, faClock, faDoorOpen, faUser, faEdit } from '@fortawesome/free-solid-svg-icons';
-import { eventoeditaredades } from '../../../api/TaskEvento';
+import { eventoeditaredades, eventsMostrarIdEvents } from '../../../api/TaskEvento';
+import { useConciertoStore } from '../../../useUserStore';
 
 
 const InfoContainer = styled.div`
@@ -61,16 +62,34 @@ const EditButton = styled.button`
   }
 `;
 
-const EventInfoBlue = ({event,location,info}) => {
+const EventInfoBlue = ({event,location,info,id}) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [hora, setHora] = useState(info.hora);
-  const [aperturaPuertas, setAperturaPuertas] = useState(info.horadeapertura);
-  const [edadMinima, setEdadMinima] = useState(info.edadminima);
-
+  const [hora, setHora] = useState('');
+  const [aperturaPuertas, setAperturaPuertas] = useState('');
+  const [edadMinima, setEdadMinima] = useState('');
+  const [loca,setloca]=useState('');
   const handleEditClick = () => {
     setIsEditing(true);
   };
-
+  useEffect(() => {
+const fetdata= async ()=>{
+  try {
+    const response = await eventsMostrarIdEvents(event.id_eventos);
+    setHora(response.data.hora);
+    console.log(response.data);
+    setAperturaPuertas(response.data.horadeapertura);
+    setEdadMinima(response.data.edadminima);
+    setloca(response.data.ubicaciondelevento);
+  
+  } catch (error) {
+  }
+ 
+}
+fetdata();
+    console.log(edadMinima);
+  }, [event.id_eventos]); // Solo dependemos de info
+  
+  // La dependencia es info
   const handleSaveClick = () => {
     setIsEditing(false);
     btnguardarmodificaredades();
@@ -98,7 +117,7 @@ const EventInfoBlue = ({event,location,info}) => {
         <InfoItem>
           <Icon icon={faMapMarkerAlt} />
           <InfoText>Lugar</InfoText>
-          <SubText>{location}</SubText>
+          <SubText>{loca}</SubText>
         </InfoItem>
         <InfoItem>
           <Icon icon={faCalendarAlt} />

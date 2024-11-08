@@ -177,22 +177,28 @@ const CreateEvent = ({onclose,id_usuariocreate,onAddEvent }) => {
   const [isSubmitting, setIsSubmitting] = useState(false); 
   const [errorMessage, setErrorMessage] = useState('');
   const today = new Date().toISOString().split('T')[0];
+  const [eventType,seteventType]=useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
     // Validación de campos
-    if (!eventName || !eventDate || !eventCity || !eventCategory || !eventImage) {
+    if (!eventName  || !eventCity || !eventCategory || !eventImage) {
       setErrorMessage('Todos los campos son obligatorios.');
       return;
     }
 
     // Validación de fecha (no puede ser menor a la fecha actual)
-    if (eventDate < today) {
-      setErrorMessage('La fecha del evento no puede ser anterior a hoy.');
-      return;
+    if (eventType !=='Rifa') {
+      if (eventDate < today) {
+        setErrorMessage('La fecha del evento no puede ser anterior a hoy.');
+        return;
+      }
+    }else{
+      setEventDate('NULL');
     }
+
 
     setIsSubmitting(true);
     
@@ -204,10 +210,13 @@ const CreateEvent = ({onclose,id_usuariocreate,onAddEvent }) => {
     formData.append('ciudad', eventCity);
     formData.append('categoria', eventCategory);
     formData.append('id_usuario', id_usuariocreate);
+    formData.append('Tipoevento',eventType);
 
     try {
       const response = await InsertarImgeventosT(formData);
+      console.log(response.data);
       const newEvent = {
+        id_eventos:response.data.id,
         nombre: eventName,
         img: URL.createObjectURL(eventImage), // Esto es solo para la vista previa, se debe cambiar por la URL que se obtiene de la API.
         ciudad: eventCity,
@@ -219,6 +228,7 @@ const CreateEvent = ({onclose,id_usuariocreate,onAddEvent }) => {
         id:response.data.id
       }
       const insert = await infoeventoinsertarpordefault(info);
+
       onAddEvent(newEvent);
     } catch (error) {
       console.log(error);
@@ -266,16 +276,30 @@ const CreateEvent = ({onclose,id_usuariocreate,onAddEvent }) => {
         />
         <label htmlFor="eventName">Nombre del Evento</label>
       </FloatingInputContainer>
-
       <FloatingInputContainer>
-        <input 
-          type="date" 
-          id="eventDate" 
-          value={eventDate} 
-          onChange={(e) => setEventDate(e.target.value)}
-        />
-        <label htmlFor="eventDate">Fecha del Evento</label>
-      </FloatingInputContainer>
+  <select 
+    id="eventType" 
+    value={eventType} 
+    onChange={(e) => seteventType(e.target.value)}
+  >
+     <option value="">Tipo de evento</option>
+    <option value="Boleta">Boleta</option>
+    <option value="Rifa">Rifa</option>
+  </select>
+  <label htmlFor="eventType">Tipo de Evento</label>
+</FloatingInputContainer>
+
+{eventType !== "Rifa" && (
+  <FloatingInputContainer>
+    <input 
+      type="date" 
+      id="eventDate" 
+      value={eventDate} 
+      onChange={(e) => setEventDate(e.target.value)}
+    />
+    <label htmlFor="eventDate">Fecha del Evento</label>
+  </FloatingInputContainer>
+)}
 
       <FloatingInputContainer>
         <select 

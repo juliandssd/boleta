@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { categoydemapamostrarporid } from '../../../api/Taskmapa';
-import { useImageStore } from '../../../useUserStore';
+import { useConciertoStore, useImageStore } from '../../../useUserStore';
 
 const PanelContainer = styled.div`
   display: flex;
@@ -13,11 +13,35 @@ const PanelContainer = styled.div`
   height: 20vh;
   box-sizing: border-box;
   overflow-x: auto;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
+const ImageContainer = styled.div`
+  display: flex;
+  align-items: center;
+  user-select: none;
+  height: 100%;
+`;
+
+const ImageWrapper = styled.div`
+  height: 100%;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const ImageItem = styled.img`
-  max-width: 100%;
-  max-height: 100%;
+  height: 100%;
+  width: auto;
   object-fit: contain;
   cursor: pointer;
   transition: transform 0.4s ease-in-out;
@@ -27,55 +51,88 @@ const ImageItem = styled.img`
   }
 `;
 
-const SVGPanel = () => {
+const SVGPanel = ({category}) => {
   const [svgUrls, setSvgUrls] = useState([]);
+  const {conciertoId} = useConciertoStore();
   const addImage = useImageStore((state) => state.addImage);
+  const containerRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   useEffect(() => {
     const fetchSvgUrls = async () => {
-      const response = await categoydemapamostrarporid(2);
-      setSvgUrls(response.data);
+      try {
+        const response = await categoydemapamostrarporid(conciertoId, category);
+        setSvgUrls(response.data);
+      } catch (error) {
+        console.error('Error fetching SVG URLs:', error);
+      }
     };
     fetchSvgUrls();
-  }, []);
+  }, [category, conciertoId]);
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.pageX - containerRef.current.offsetLeft);
+    setScrollLeft(containerRef.current.scrollLeft);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - containerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    containerRef.current.scrollLeft = scrollLeft - walk;
+  };
 
   const handleDoubleClick = (url) => {
     getSvgDimensions(url, (width, height) => {
-      console.log(`Dimensions of SVG: width=${width}, height=${height}`); // Verifica las dimensiones en consola
-
-      const x = 50; // Coordenada inicial x
-      const y = 50; // Coordenada inicial y
+      const x = 50;
+      const y = 50;
       const newObject = { 
         url, 
         x, 
         y, 
-        width, // Usa el ancho original
-        height, // Usa la altura original
+        width,
+        height,
         id: `temp-${Math.random().toString(36).substr(2, 9)}` 
       };
-      addImage(newObject); // Agrega la imagen con dimensiones originales al store global
+      addImage(newObject);
     });
   };
 
   const getSvgDimensions = (url, callback) => {
     const img = new Image();
     img.onload = () => {
-      const width = img.naturalWidth; // Ancho original
-      const height = img.naturalHeight; // Altura original
-      callback(width, height); // Pasa las dimensiones al callback
+      callback(img.naturalWidth, img.naturalHeight);
     };
-    img.src = url; // Carga la imagen
+    img.src = url;
   };
   
   return (
-    <PanelContainer>
-      {svgUrls.map((item, index) => (
-        <ImageItem
-          key={index}
-          src={item.url}
-          onDoubleClick={() => handleDoubleClick(item.url)}
-        />
-      ))}
+    <PanelContainer
+      ref={containerRef}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      onMouseMove={handleMouseMove}
+    >
+      <ImageContainer>
+        {svgUrls.map((item, index) => (
+          <ImageWrapper key={index}>
+            <ImageItem
+              src={item.url}
+              onDoubleClick={() => handleDoubleClick(item.url)}
+              draggable={false}
+            />
+          </ImageWrapper>
+        ))}
+      </ImageContainer>
     </PanelContainer>
   );
 };

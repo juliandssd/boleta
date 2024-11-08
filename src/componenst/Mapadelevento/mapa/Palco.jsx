@@ -57,6 +57,7 @@ const StyledPriceList = styled(PriceList)`
 const CircleMap = () => {
   const [objects, setObjects] = useState([]); // Objetos en el plano
   const [selectedObjectId, setSelectedObjectId] = useState(null);
+  const [category, setCategory] = useState(''); 
  const [infoposicion,setinfoposicion]=useState([]);
 const {conciertoId}=useConciertoStore();
   const [isMoveEnabled, setIsMoveEnabled] = useState(true);
@@ -76,11 +77,11 @@ const {conciertoId}=useConciertoStore();
   return (
     <MainContainer >
     <ComponentContainer>
-    <HeaderWithButton/>
+    <HeaderWithButton category={category} setCategory={setCategory}/>
     </ComponentContainer>
 
     <ComponentContainer>
-      <SVGPanel />
+      <SVGPanel category={category} />
     </ComponentContainer>
 
 

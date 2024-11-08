@@ -9,7 +9,7 @@ import PricingTable from './PricingTable';
 import TermsAndConditions from '../../condition/Terminos';
 import ResponsibleInfo from './ResponsibleInfo';
 import { useNavigate } from 'react-router-dom';
-import { useEventStore } from '../../../useUserStore';
+import { useConciertoStore, useEventStore } from '../../../useUserStore';
 
 // Contenedor principal que organiza la disposición
 const Container = styled.div`
@@ -171,6 +171,7 @@ const ModernEventComponent = ({ event,initialLocation }) => {
   const [infoeventsdata, setinfoevents] = useState(null);
   const [location, setLocation] = useState(initialLocation || "");
   const [originalLocation, setOriginalLocation] = useState(initialLocation || ""); 
+  const { conciertoId } = useConciertoStore();
   const navigate = useNavigate();
   const { setEventId } = useEventStore();
   const handleEditClick = () => {
@@ -201,7 +202,7 @@ const infoevent=async()=>{
   }
 }
 infoevent();
-  },[])
+  },[event.id_eventos])
 
 
   const editarubicacion=async()=>{
@@ -271,11 +272,11 @@ infoevent();
       </EventInfo>
     
     </EventContainer>
-    <EventInfoBlue event={event} location={location} info={infoeventsdata} />
+    <EventInfoBlue id={conciertoId} event={event} location={location} info={infoeventsdata} />
     <ImageUploadComponent event={event}/>
-    <PricingTable/>
-    <TermsAndConditions/>
+    <PricingTable id={conciertoId}/>
     <ResponsibleInfo  event={event} info={infoeventsdata}/>
+    <TermsAndConditions/>
     </Container>
   );
 };

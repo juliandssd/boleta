@@ -35,17 +35,21 @@ const Container = styled.div`
 
   @media (max-width: 768px) {
     width: 90%;
-    height: 50vh;
+    height: 40vh;
   }
 `;
 
 const PanZoomContainer = styled.div`
   width: 100%;
   height: 100%;
-  touch-action: none;
+  position: relative;
 
-  .react-easy-panzoom {
+  &.interacting {
     touch-action: none;
+  }
+
+  &:not(.interacting) {
+    touch-action: auto;
   }
 `;
 
@@ -85,6 +89,7 @@ const SeatMap = ({objects}) => {
   const [toggleState, setToggleState] = useState(false);
   const [selectedImageId, setSelectedImageId] = useState(null);
   const layerRef = useRef(null);
+  const [isInteracting, setIsInteracting] = useState(false);
   useEffect(() => {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     setIsMobile(/android|iPad|iPhone|iPod/i.test(userAgent));
@@ -158,39 +163,51 @@ const SeatMap = ({objects}) => {
       }
     }
   };
-  const handleTouchStart = (id, categoria) => {
-    const currentTime = new Date().getTime();
-    const tapLength = currentTime - lastTap;
-    
-    if (tapLength < DOUBLE_TAP_DELAY && tapLength > 0) {
-      // Es un doble toque
-      handleImageDoubleClick(id, categoria);
-    }
-    setLastTap(currentTime);
+
+  const handlePanStart = () => {
+    setIsInteracting(true);
   };
+
+  const handlePanEnd = () => {
+    setIsInteracting(false);
+  };
+
 
   return (
     <Container>
      {isMobile ? (
-        <PanZoomContainer>
-          <PanZoom
+     <PanZoomContainer className={isInteracting ? 'interacting' : ''}>
+       <PanZoom
             minZoom={0.5}
-            maxZoom={2}
+            maxZoom={1}
             enableTouch
             enableZoom
-            zoomSpeed={0.3}
+            defaultZoom={5} 
+            zoomSpeed={0.15} // Reducido de 0.3 a 0.15 para un zoom más suave
+            zoomInSteps={100} // Más pasos para un zoom más granular
+            zoomOutSteps={100}
             autoCenter
-            disableScroll={true} // Cambiado a true para prevenir scroll
-            preventPan={(e) => e.target.classList.contains('pan-zoom-container')}
+            onPanStart={handlePanStart}
+            onPanEnd={handlePanEnd}
+            onZoomStart={handlePanStart}
+            onZoomEnd={handlePanEnd}
+            style={{ width: '100%', height: '100%' }}
+            transformStyle="preserve-3d" // Mejora el rendimiento de las transformaciones
+            enableTransition // Habilita transiciones suaves
+            pinchEnabled={true} // Asegura que el pinch zoom esté habilitado
+            pinchZoomSpeed={0.15} // Velocidad del pinch zoom
+            smoothScaling // Habilita el escalado suave
+            centerZoomedOut
+            bounces={false}
           >
             <Stage
-              width={500}
-              height={700}
-              x={-50}
-              y={10}
+              width={1000}
+              height={1000}
+              x={-100}
+              y={200}
               draggable={isDraggable}
-              scaleX={0.5}
-              scaleY={0.5}
+              scaleX={1}
+              scaleY={1}
               pixelRatio={2}
             >
               <Layer>

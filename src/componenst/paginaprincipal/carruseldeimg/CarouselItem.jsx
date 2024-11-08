@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { eventopublicarpublicidadprincipal } from '../../../api/TaskEvento';
 
 const CarouselContainer = styled.div`
-  width: 100vw;
+  width: 95vw;
   height: 450px;
   overflow: hidden;
   position: relative;

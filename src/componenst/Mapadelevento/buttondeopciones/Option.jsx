@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import { posicionesinsertar } from '../../../api/Taskposiciones';
-import { useConciertoStore, usedatamapa, useImageStore, usemovimiento, useselectgloabal } from '../../../useUserStore';
+import { posicioneseliminar, posicionesinsertar } from '../../../api/Taskposiciones';
+import { useConciertoStore, usedatamapa, useImageStore, usemovimiento, useselectgloabal, useSelectGlobal } from '../../../useUserStore';
 
 // Contenedor de los botones
 const ButtonContainer = styled.div`
@@ -34,9 +34,12 @@ const Button = styled.button`
 `;
 
 const ObjectControlPanel = ({ infoposicion, objects, setObjects  }) => {
-  const { datamapaconfigurar } = usedatamapa(); // Llama a usedatamapa aquí
+  const { datamapaconfigurar,setdatamapaconfigurar } = usedatamapa(); // Llama a usedatamapa aquí
   const { isDraggable, toggleDraggable } = usemovimiento();
-  const selectedObjectId = useselectgloabal((state) => state.selectedObjectId);
+  const { 
+    setSelectedObjectId,
+    selectedObjectId
+  } = useSelectGlobal();
   const addImage = useImageStore((state) => state.addImage);
   const {conciertoId} =useConciertoStore();
   // Función para guardar objetos
@@ -91,10 +94,20 @@ const ObjectControlPanel = ({ infoposicion, objects, setObjects  }) => {
     addImage(newObject);
   }
 
+  const handleDelete =async () => {
+    if (!selectedObjectId) return; // Validación
+    
+    // Agregar confirmación
+    if (window.confirm('¿Estás seguro de que deseas eliminar este objeto?')) {
+const response = await posicioneseliminar({id:selectedObjectId});
+      window.location.reload()
+        console.log('ID del objeto a eliminar:', selectedObjectId);
+    }
+};
   return (
     <ButtonContainer>
       <Button onClick={handleDuplicate} disabled={selectedObjectId === null}>Duplicar Objeto</Button>
-      <Button disabled={selectedObjectId === null}>Eliminar Objeto</Button>
+      <Button disabled={selectedObjectId === null} onClick={handleDelete}>Eliminar Objeto</Button>
       <Button onClick={toggleDraggable}>
       {isDraggable ? 'Desactivar Movimiento' : 'Activar Movimiento'}
     </Button>

@@ -196,3 +196,22 @@ export const useidcreate = create((set) => ({
     set({ idcreate: null });
   }
 }));
+
+export const useColorCordenada = create((set) => ({
+  coordinates: { x: '', y: '' },
+  colorseleccionado: null,
+  setCoordinates: (coords) => set({ coordinates: coords }),
+  setColor: (color) => set({ colorseleccionado: color }),
+}));
+
+
+
+export const useSelectGlobal = create((set) => ({
+  selectedObjectId: null,
+  setSelectedObjectId: (id) => set({ selectedObjectId: id }),
+  datamapaconfigurar: [],
+  setDatamapaconfigurar: (data) => set({ datamapaconfigurar: data }),
+  addObject: (object) => set((state) => ({ 
+    datamapaconfigurar: [...state.datamapaconfigurar, object] 
+  })),
+})); 

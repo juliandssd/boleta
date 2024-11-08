@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { FaUpload } from 'react-icons/fa';
 import { Insertarsvg } from '../../../api/Task';
-import { useUserStore } from '../../../useUserStore';
-
+import { useConciertoStore, useUserStore } from '../../../useUserStore';
+import { CategorymostrarporIDvento } from '../../../api/TaskEvento';
 // Estilos generales del contenedor para centrar el formulario
 const Container = styled.div`
   display: flex;
@@ -138,78 +138,102 @@ const ErrorMessage = styled.p`
   margin-top: -10px;
   margin-bottom: 10px;
 `;
+// Agrega este contenedor para organizar las vistas previas de múltiples imágenes
+const PreviewContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+`;
+
+// Asegúrate también de tener `PreviewImage` definido
+
+
 
 const FormComponent = ({ onClose }) => {
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [category, setCategory] = useState('');
-  const [state, setState] = useState('');
+  const [categories, setCategories] = useState([]); 
+  const {conciertoId}=useConciertoStore();
   const [previewURL, setPreviewURL] = useState('');
   const [errors, setErrors] = useState({});
   const [archivo, setarchivo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);  // Estado de carga
   const [successMessage, setSuccessMessage] = useState('');  // Estado para el mensaje de éxito
   const id_usuario =useUserStore((state) => state.userId);
+  const [isNewCategory, setIsNewCategory] = useState(false); // Declaración de isNewCategory en el estado
+  const [newCategory, setNewCategory] = useState('');
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    // Asegurarse de que el archivo es un SVG
-    if (selectedFile && selectedFile.type === 'image/svg+xml') {
-      setFile(selectedFile);
-      setarchivo(selectedFile);
-      setPreviewURL(URL.createObjectURL(selectedFile));
-      setErrors({ ...errors, file: '' });  // Limpiar error si la carga es exitosa
+    const selectedFiles = Array.from(e.target.files);
+    const svgFiles = selectedFiles.filter(file => file.type === 'image/svg+xml');
+    
+    if (svgFiles.length) {
+      setFiles(svgFiles.map(file => ({
+        file,
+        previewURL: URL.createObjectURL(file) // Genera la URL de vista previa para cada archivo
+      })));
+      setErrors({ ...errors, file: '' });
     } else {
-      setFile(null);
-      setPreviewURL(''); // Limpiar la vista previa
-      setErrors({ ...errors, file: 'Por favor, sube un archivo SVG.' });
+      setFiles([]);
+      setErrors({ ...errors, file: 'Por favor, sube solo archivos SVG.' });
     }
   };
+  
   const handleButtonClick = () => {
     document.getElementById('fileInput').click();
   };
 
   const validateForm = () => {
     let formErrors = {};
-
-    // Validar archivo
-    if (!file) {
-      formErrors.file = 'Es obligatorio subir un archivo.';
+  
+    // Validar si al menos un archivo ha sido seleccionado
+    if (!files.length) {
+      formErrors.file = 'Es obligatorio subir al menos un archivo.';
     }
-
-    // Validar categoría
+  
+    // Validar si la categoría ha sido seleccionada
     if (!category) {
       formErrors.category = 'La categoría es obligatoria.';
     }
-
-    // Validar estado
-    if (!state) {
-      formErrors.state = 'El estado es obligatorio.';
-    }
-
+  
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
     if (validateForm()) {
-      setIsLoading(true);  // Activar el estado de carga
-      setSuccessMessage('');  // Limpiar el mensaje de éxito
-  
+      setIsLoading(true);
+      setSuccessMessage('');
       try {
-  
-        await InsertarsvgEnfronte(archivo);  // Aquí llamamos a la función que envía el archivo
-        setSuccessMessage('Registrado correctamente.'); 
+        for (const fileObj of files) {
+          console.log(fileObj.file); // Asegúrate de que `fileObj.file` esté definido
+           await InsertarsvgEnfronte(fileObj.file); // Comenta esta línea si deseas probar solo la validación
+        }
+        setSuccessMessage('Registrado correctamente.');
+        setFiles([]); // Limpia la lista de archivos seleccionados
+        setCategory(''); // Limpia la categoría seleccionada
         onClose();
-        // Mostrar mensaje de éxito
       } catch (error) {
-        console.error('Error al registrar el archivo:', error);  // Imprimir cualquier error
+        console.error('Error al registrar los archivos:', error);
       } finally {
-        setIsLoading(false);  // Finalizar el estado de carga
+        setIsLoading(false);
       }
     }
   };
   
+  
+  useEffect(()=>{
+    const fetdata=async()=>{
+      try {
+        const response = await CategorymostrarporIDvento(conciertoId);
+        setCategories(response.data);
+      } catch (error) {
+        
+      }
+    }
+    fetdata();
+  },[])
 
   const InsertarsvgEnfronte = async (file) => {
     const currentDateTime = new Date(); // Obtiene la fecha y hora actual
@@ -221,9 +245,9 @@ const FormComponent = ({ onClose }) => {
     const formData = new FormData(); // Crea un nuevo FormData
     formData.append('file', file);
     formData.append('date', formattedDateTime);
-    formData.append('id_usuarioevento', id_usuario);
+    formData.append('id_usuarioevento', conciertoId);
     formData.append('category', category);
-    formData.append('estado', state);
+    formData.append('estado', 'PUBLICO');
     
     try {
       const response = await Insertarsvg(formData);
@@ -262,20 +286,88 @@ const ModalContent = styled.div`
   align-items: center;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
 `;
+const NewCategoryInput = styled.input`
+  width: 90%;
+  padding: 10px;
+  margin-top: 10px;
+  border: 2px solid #007bff;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #333;
+  background-color: #f9f9f9;
+  outline: none;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: #0056b3;
+  }
+
+  &::placeholder {
+    color: #888;
+  }
+`;
 
 const handleFocus = (e) => {
   e.preventDefault(); // Previene el movimiento del scroll al obtener el foco
 };
+const handleCategoryChange = (e) => {
+  const selectedValue = e.target.value;
+  if (selectedValue === 'NuevaCategoria') {
+    setIsNewCategory(true);
+    setCategory('');
+  } else {
+    setIsNewCategory(false);
+    setCategory(selectedValue);
+    setNewCategory('');
+  }
+};
 
+const handleNewCategoryChange = (e) => {
+  const value = e.target.value;
+  setNewCategory(value);
+  setCategory(value); // Actualizamos ambos estados
+};
 
+useEffect(()=>{
+  const fetdata=async()=>{
+    try {
+      const response = await CategorymostrarporI
+      setCategories(response.data);
+    } catch (error) {
+      
+    }
+  }
+  fetdata();
+},[])
   return (
     <Container>
-      <ModalOverlay>
-      <ModalContent>
+  <ModalOverlay>
+    <ModalContent>
       <Form onSubmit={handleSubmit}>
         {/* Botón de cierre en la parte superior derecha */}
         <CloseButton onClick={onClose}>X</CloseButton>
-
+        <FormGroup>
+      <Label htmlFor="category">Categoría:</Label>
+      <Select value={category} onChange={handleCategoryChange}>
+        <option value="">Categoría</option>
+        {categories.map((cat, index) => (
+          <option key={index} value={cat.categoria}>
+            {cat.categoria}
+          </option>
+        ))}
+        <option value="NuevaCategoria">Crear nueva categoría...</option>
+      </Select>
+      {isNewCategory && (
+  <NewCategoryInput
+    type="text"
+    value={newCategory}
+    onChange={handleNewCategoryChange}
+    placeholder="Nombre de nueva categoría"
+    autoFocus
+  />
+)}
+      {errors.category && <ErrorMessage>{errors.category}</ErrorMessage>}
+    </FormGroup>
         <FormGroup>
           <HiddenInput
             type="file"
@@ -283,54 +375,31 @@ const handleFocus = (e) => {
             name="file"
             accept=".svg"
             onChange={handleFileChange}
-            required
+            multiple
           />
           <UploadButton type="button" onClick={handleButtonClick}>
             <FaUpload />
-            Subir archivo
+            Subir archivos
           </UploadButton>
           {errors.file && <ErrorMessage>{errors.file}</ErrorMessage>}
-          {previewURL && <PreviewImage src={previewURL} alt="Vista previa" />}
+          
+          {/* Agrega PreviewContainer aquí para mostrar todas las vistas previas */}
+          <PreviewContainer>
+            {files.map((fileObj, index) => (
+              <PreviewImage key={index} src={fileObj.previewURL} alt={`Vista previa ${index + 1}`} />
+            ))}
+          </PreviewContainer>
         </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="category">Categoría:</Label>
-          <Select
-            id="category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            required
-            onFocus={handleFocus}
-          >
-            <option value="">Selecciona una categoría</option>
-            <option value="Concierto">Concierto</option>
-            <option value="Evento">Evento</option>
-            <option value="Estadio">Estadio</option>
-            <option value="Discoteca">Discoteca</option>
-            <option value="Teatro">Teatro</option>
-          </Select>
-          {errors.category && <ErrorMessage>{errors.category}</ErrorMessage>}
-        </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="state">Estado:</Label>
-          <Select id="state" value={state} onChange={(e) => setState(e.target.value)}>
-            <option value="">Selecciona un estado</option>
-            <option value="PUBLICO">PUBLICO</option>
-            <option value="PRIVADO">PRIVADO</option>
-          </Select>
-          {errors.state && <ErrorMessage>{errors.state}</ErrorMessage>}
-        </FormGroup>
-
         <Button onClick={handleSubmit} type="submit" disabled={isLoading}>
           {isLoading ? 'Cargando...' : 'Guardar'}
         </Button>
 
         {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
       </Form>
-      </ModalContent>
-      </ModalOverlay>
-    </Container>
+    </ModalContent>
+  </ModalOverlay>
+</Container>
+
   );
 };
 
