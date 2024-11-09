@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { palcoinfomostrargeneral } from '../../../api/Taskpalco';
+import { useConciertoStore } from '../../../useUserStore';
 
 // Styled components
 const TableContainer = styled.div`
@@ -68,11 +69,11 @@ const ColorBox = styled.div`
 // Componente principal
 const TablaDePrecio = () => {
   const [items, setItems] = useState([]);
-
+  const { conciertoId } = useConciertoStore();
   // Función para obtener los datos de la API
   const infogeneral = async () => {
     try {
-      const response = await palcoinfomostrargeneral(17);
+      const response = await palcoinfomostrargeneral(conciertoId);
       console.log(response.data); // Muestra los datos en la consola para verificar
       setItems(response.data); // Guarda los datos en el estado
     } catch (error) {

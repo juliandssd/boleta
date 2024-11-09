@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { palcomostrarPorCategoriayidevento } from '../../../api/Taskpalco';
-import { useDataStorePalco, useVisibilityStore } from '../../../useUserStore';
+import { useConciertoStore, useDataStorePalco, useVisibilityStore } from '../../../useUserStore';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 // Styled components
@@ -116,6 +116,7 @@ const PriceList = () => {
   const [locations, setLocations] = useState([]);
   const [checkedItems, setCheckedItems] = useState({});
   const { dataList, setInitialData } = useDataStorePalco();
+  const { conciertoId } = useConciertoStore();
   const { hiddenCategories, toggleCategoryVisibility } = useVisibilityStore();
 
   useEffect(() => {
@@ -124,7 +125,7 @@ const PriceList = () => {
 
   const palcoMostrarporcategory = async () => {
     try {
-      const response = await palcomostrarPorCategoriayidevento(17);
+      const response = await palcomostrarPorCategoriayidevento(conciertoId);
       setLocations(response.data);
 
       // Inicializar `checkedItems` basado en `hiddenCategories`

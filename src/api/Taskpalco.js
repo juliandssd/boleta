@@ -26,9 +26,12 @@ export const palcoinfomostrargeneral= async (id)=>
 export const palcoprecio= async (id)=>
     await axios.get(`${ip}/api/palco/precio/${id}`);
 
-export const palcomostrarcliente= async (id)=>
-    await axios.get(`${ip}/api/palco/mostrar/cliente/${id}`);
+export const palcomostrarcliente= async (id,prec,cat)=>
+    await axios.get(`${ip}/api/palco/mostrar/cliente/${id}/${prec}/${cat}`);
 
 
 export const palcoeditarocupadoTask= async (data)=>
     await axios.post(`${ip}/api/palco/editar/ocupado`,data);
+
+export const palcoCategoryMostrarPorid_evento= async (id)=>
+    await axios.get(`${ip}/api/palco/mostrar/categoria/poridevento/${id}`);

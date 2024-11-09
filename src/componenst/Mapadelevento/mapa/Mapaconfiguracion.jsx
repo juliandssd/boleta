@@ -9,7 +9,7 @@ import { useColorCordenada, useConciertoStore, usedatamapa, useImageStore, usemo
 import Fpalcos from './Datosdepalco';
 import Tooltip from './CartelAnuncioTooltip';
 const Container = styled.div`
-  width: 47.5%; /* Cambiar de 50vw a 100% para que ocupe solo el espacio disponible */
+  width: 44%; /* Cambiar de 50vw a 100% para que ocupe solo el espacio disponible */
   height: 80vh;
   background-color: #2b2b2b;
   background-image: 
@@ -132,7 +132,63 @@ const SeatMapConfiguration = ({objects}) => {
       return [...prevData, ...uniqueImages];
     });
   }, [imagesglobal]);
-
+  const MOVEMENT_AMOUNT = 1;
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!selectedShapeId || !isDraggable) return;
+  
+      const selectedNode = imageRefs.current[selectedShapeId];
+      if (!selectedNode) return;
+  
+      let newX = selectedNode.x();
+      let newY = selectedNode.y();
+  
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          newY -= MOVEMENT_AMOUNT;
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          newY += MOVEMENT_AMOUNT;
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          newX -= MOVEMENT_AMOUNT;
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          newX += MOVEMENT_AMOUNT;
+          break;
+        default:
+          return;
+      }
+  
+      // Actualizar posición del nodo
+      selectedNode.position({ x: newX, y: newY });
+      selectedNode.getLayer().batchDraw();
+  
+      // Actualizar coordenadas en el estado
+      setCoordinates({
+        x: newX.toString(),
+        y: newY.toString()
+      });
+  
+      // Crear evento sintético para handleDragEnd
+      const syntheticEvent = {
+        target: selectedNode
+      };
+  
+      // Llamar a handleDragEnd para actualizar el estado
+      handleDragEnd(selectedShapeId, syntheticEvent);
+    };
+  
+    window.addEventListener('keydown', handleKeyDown);
+  
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedShapeId, isDraggable]);
 
   const handleDragEnd = (id, e) => {
     // Obtener el nodo que se está transformando
