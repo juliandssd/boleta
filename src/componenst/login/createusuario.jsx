@@ -46,7 +46,8 @@ const RegisterForm = () => {
       if (response.data.message === 'correctamente') {
     
         setidcreate(response.data.encryptedIdd);
-        navigate('/verify/number');
+        alert('Bien');
+        //navigate('/verify/number');
       }
     } catch (error) {
  console.log(error);
