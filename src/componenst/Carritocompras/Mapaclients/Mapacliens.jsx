@@ -153,14 +153,41 @@ const SeatMap = ({objects}) => {
     setSelectedImageId(selectedImageId === id ? null : id);
   };
 
+  function smoothScrollToBottom(duration = 1000) {
+    // Obtener la posición actual del scroll
+    const startPosition = window.pageYOffset;
+    // Calcular la distancia total a recorrer (altura total del documento - altura visible)
+    const targetPosition = document.documentElement.scrollHeight - window.innerHeight;
+    // Calcular la distancia que se necesita desplazar
+    const distance = targetPosition - startPosition;
+    let startTime = null;
 
-  const handleImageDoubleClick = (id, categoria) => {
+    function animation(currentTime) {
+        if (startTime === null) startTime = currentTime;
+        const timeElapsed = currentTime - startTime;
+        const progress = Math.min(timeElapsed / duration, 1);
+        
+        // Función de ease-out para hacer el movimiento más natural
+        const easeOut = progress => 1 - Math.pow(1 - progress, 3);
+        
+        window.scrollTo(0, startPosition + distance * easeOut(progress));
+
+        if (timeElapsed < duration) {
+            requestAnimationFrame(animation);
+        }
+    }
+
+    requestAnimationFrame(animation);
+}
+  const handleImageDoubleClick = (id, categoria,estado) => {
     if (categoria !== 'VACIO') {
-
-      if (selectedImageId != id) {
-        setSelectedId(id);
-        toggleImageUrl(id);
-      }
+      if (estado !=='OCUPADO') {
+        if (selectedImageId != id) {
+          setSelectedId(id);
+          toggleImageUrl(id);
+          smoothScrollToBottom();
+        }
+      }     
     }
   };
 
@@ -203,7 +230,7 @@ const SeatMap = ({objects}) => {
             <Stage
               width={1000}
               height={1000}
-              x={-100}
+              x={-150}
               y={200}
               draggable={isDraggable}
               scaleX={1}
@@ -228,7 +255,7 @@ const SeatMap = ({objects}) => {
                         width={itemData?.width || 100}
                         height={itemData?.height || 100}
                         image={item.image}
-                        onDblTap={() => handleImageDoubleClick(item.id, itemData?.categoria)}
+                        onDblTap={() => handleImageDoubleClick(item.id, itemData?.categoria,itemData?.estado)}
                         onMouseEnter={handleMouseEnter}
                         opacity={isSelected ? 0.300 : 1}
                         onMouseLeave={handleMouseLeave}
@@ -287,7 +314,7 @@ const SeatMap = ({objects}) => {
           width={itemData?.width || 100}
           height={itemData?.height || 100}
           image={item.image}
-          onDblClick={() => handleImageDoubleClick(item.id, itemData?.categoria)}
+          onDblClick={() => handleImageDoubleClick(item.id, itemData?.categoria,itemData?.estado)}
           //onDblClick={() => handleImageDoubleClick(item.id, itemData.categoria)}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}

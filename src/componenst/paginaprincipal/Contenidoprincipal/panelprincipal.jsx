@@ -10,12 +10,16 @@ import FooterContainer  from '../../piedepagina/piedepagina';
 // Crear un styled-component llamado `PrincipalText`
 const MainContainer = styled.div`
   background-color: #1c1c1c;
-  width: 96%;
-  max-width: 100vw; /* Limita el ancho máximo al tamaño de la ventana */
+  width: 100%;
   margin: 0;
   padding: 0;
   min-height: 100vh; 
-  box-sizing: border-box; /* Asegura que padding y border estén dentro del ancho total */
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    width: 96%;
+    margin: 0 auto;
+  }
 `;
 const GlobalStyle = createGlobalStyle`
   * {
@@ -39,7 +43,12 @@ const GlobalStyle = createGlobalStyle`
 const MainContainerPrincipal = styled.div`
   background-color: #1c1c1c;
   width: 100%;
-  max-width: 100%; /* Limita el ancho máximo al tamaño de la ventana */
+  max-width: 100%;
+
+  @media (max-width: 768px) {
+    width: 96%;
+    margin: 0 auto;
+  }
 `;
 
 // Componente funcional que renderiza el texto "Principal"

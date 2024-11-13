@@ -204,6 +204,7 @@ const Pcabezeraartista = ({ event }) => {
 
   const handlecomprar = () => {
     window.scrollTo(0, 0);
+    console.log(event);
     setdataevento(event);
     navigate('/carrito/de/compra');
   };

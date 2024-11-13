@@ -29,7 +29,7 @@ function App() {
           <Route path='/perfilempresario' element={<LoginForm/>}/>
           <Route path='/empresario/editar/info' element={<PerfilEmpresario/>}/>
           <Route path='/verify/number' element={<VerificacionCodigo/>}/>
-          <Route path='/pagos' element={<PaginaPago/>}/>
+          <Route path='/pagos/tarjeta' element={<PaginaPago/>}/>
           <Route path='/pagos/pse' element={<PSE/>}/>
           <Route path='/pagos/bancolombia' element={<WompiBancolombiaPayment/>}/>
           {/* Ruta protegida */}

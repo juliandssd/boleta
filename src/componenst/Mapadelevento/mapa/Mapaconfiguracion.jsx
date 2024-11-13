@@ -96,6 +96,7 @@ const SeatMapConfiguration = ({objects}) => {
   const transformerRef = useRef(null);
   const { setCoordinates } = useColorCordenada();
   const imageRefs = useRef({});
+  const layerRefs = useRef({});
   useEffect(() => {
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     setIsMobile(/android|iPad|iPhone|iPod/i.test(userAgent));
@@ -281,132 +282,169 @@ const SeatMapConfiguration = ({objects}) => {
       };
   return (
     <Container>
-      {isMobile ? (
-        <PanZoom
-          minZoom={0.5}
-          maxZoom={2} // Limitar el zoom máximo en móviles
-          enableTouch
-          enableZoom
-          zoomSpeed={0.3} // Aumentar velocidad de zoom en móviles
-          autoCenter
-          disableScroll
-        >
-          <Stage
-            width={window.innerWidth}
-            height={window.innerHeight}
-            draggable={isDraggable} 
-            scaleX={0.5} // Reducir escala para que se ajuste mejor en móviles
-            scaleY={0.5}
-            onClick={handleStageClick}
-            pixelRatio={2} // Mejorar resolución en dispositivos móviles
-          >
-            <Layer>
-            {images
-              .filter((item) => {
-                const itemData = imagesData.find((data) => data.id === item.id);
-                // Si la categoría está en hiddenCategories y su valor es true, no se mostrará
-                const isVisible = !hiddenCategories[itemData?.categoria];
-                console.log(`Image ID: ${item.id}, Category: ${itemData?.categoria}, isVisible: ${isVisible}`);
-                return isVisible;
-              }).map((item) => (
+  {isMobile ? (
+    <PanZoom
+      minZoom={0.5}
+      maxZoom={2}
+      enableTouch
+      enableZoom
+      zoomSpeed={0.3}
+      autoCenter
+      disableScroll
+    >
+      <Stage
+        width={window.innerWidth}
+        height={window.innerHeight}
+        draggable={isDraggable} 
+        scaleX={0.5}
+        scaleY={0.5}
+        onClick={handleStageClick}
+        pixelRatio={2}
+      >
+        {/* Capa base */}
+        <Layer>
+          {/* Aquí pueden ir elementos de fondo si los necesitas */}
+        </Layer>
 
-                <KonvaImage
-  key={item.id}
-  x={imagesData.find(data => data.id === item.id)?.x || 0}
-  y={imagesData.find(data => data.id === item.id)?.y || 0}
-  width={(imagesData.find(data => data.id === item.id)?.width || 100) * 1.5}
-  height={(imagesData.find(data => data.id === item.id)?.height || 100) * 1.5}
-  image={item.image}
-  onClick={(e) => handleImageClick(item.id, e)}
-  draggable={isDraggable} 
-  onMouseOver={(e) => handleMouseOver(e, { id: item.id, info: 'Información del objeto' })}
-  onMouseMove={handleMouseMove} // Actualizar posición en cada movimiento
-  onMouseOut={handleMouseOut}
-  onDblClick={() => handledabrir(item.id,item.image)}
-  onDragEnd={(e) => handleDragEnd(item.id, e)}
-/>
-
-              ))}
+        {/* Capas de imágenes individuales */}
+        {images
+          .filter((item) => {
+            const itemData = imagesData.find((data) => data.id === item.id);
+            const isVisible = !hiddenCategories[itemData?.categoria];
+            console.log(`Image ID: ${item.id}, Category: ${itemData?.categoria}, isVisible: ${isVisible}`);
+            return isVisible;
+          })
+          .map((item) => (
+            <Layer 
+              key={`layer-${item.id}`}
+              ref={node => {
+                layerRefs.current[item.id] = node;
+              }}
+            >
+              <KonvaImage
+                key={item.id}
+                x={imagesData.find(data => data.id === item.id)?.x || 0}
+                y={imagesData.find(data => data.id === item.id)?.y || 0}
+                width={(imagesData.find(data => data.id === item.id)?.width || 100) * 1.5}
+                height={(imagesData.find(data => data.id === item.id)?.height || 100) * 1.5}
+                image={item.image}
+                onClick={(e) => handleImageClick(item.id, e)}
+                draggable={isDraggable} 
+                onMouseOver={(e) => handleMouseOver(e, { id: item.id, info: 'Información del objeto' })}
+                onMouseMove={handleMouseMove}
+                onMouseOut={handleMouseOut}
+                onDblClick={() => handledabrir(item.id, item.image)}
+                onDragEnd={(e) => handleDragEnd(item.id, e)}
+              />
             </Layer>
-          </Stage>
-        </PanZoom>
-      ) : (
-        <Stage
-          width={window.innerWidth}
-          height={window.innerHeight}
-          draggable={isDraggable} 
-          pixelRatio={1} // Configuración estándar para escritorio
-          onWheel={(e) => {
-            e.evt.preventDefault();
-            const scaleBy = 1.05;
-            const stage = e.target.getStage();
-            const oldScale = stage.scaleX();
-            const pointer = stage.getPointerPosition();
+          ))}
 
-            const newScale = e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
-            stage.scale({ x: newScale, y: newScale });
-
-            const mousePointTo = {
-              x: (pointer.x - stage.x()) / oldScale,
-              y: (pointer.y - stage.y()) / oldScale,
-            };
-            const newPos = {
-              x: pointer.x - mousePointTo.x * newScale,
-              y: pointer.y - mousePointTo.y * newScale,
-            };
-
-            stage.position(newPos);
-            stage.batchDraw();
-          }}
-        >
-          <Layer>
-          {images
-              .filter((item) => {
-                const itemData = imagesData.find((data) => data.id === item.id);
-                // Si la categoría está en hiddenCategories y su valor es 
-                const isVisible = itemData?.categoria === "VACIO" || !hiddenCategories[itemData?.categoria];
-                return isVisible;
-              }).map((item) => (
-                <React.Fragment key={item.id}>
-                <KonvaImage
-                ref={(node) => {
-                  imageRefs.current[item.id] = node; // Vincula el nodo con su referencia
-                }}
-                  x={imagesData.find((data) => data.id === item.id)?.x || 0}
-                  y={imagesData.find((data) => data.id === item.id)?.y || 0}
-                  width={imagesData.find((data) => data.id === item.id)?.width || 100}
-                  height={imagesData.find((data) => data.id === item.id)?.height || 100}
-                  image={item.image}
-                  onClick={() => handleImageClick(item.id)}
-                  draggable={isDraggable}
-                  onTransformEnd={(e) => handleDragEnd(item.id, e)}
-                  onDblClick={() => handledabrir(item.id,item.image)}
-                  onDragEnd={(e) => handleDragEnd(item.id, e)}
-                />
-              </React.Fragment>
-            ))}
-          <Transformer ref={transformerRef}
+        {/* Capa del transformer */}
+        <Layer>
+          <Transformer
+            ref={transformerRef}
             boundBoxFunc={(oldBox, newBox) => ({
               ...newBox,
               width: Math.max(10, newBox.width),
               height: Math.max(10, newBox.height)
             })}
           />
-          </Layer>
-        </Stage>
-      )}
-      {isFpalco && (
-        <ModalOverlay>
-          <ModalContent style={{ maxHeight: '500px', maxWidth: '700px' }}>
-            <Fpalcos onClose={handledclosed} id_posicionespalco={id_posicionespalco} link={linkimagen}  />
-          </ModalContent>
-        </ModalOverlay>
-      )}
+        </Layer>
+      </Stage>
+    </PanZoom>
+  ) : (
+    <Stage
+      width={window.innerWidth}
+      height={window.innerHeight}
+      draggable={isDraggable} 
+      pixelRatio={1}
+      onWheel={(e) => {
+        e.evt.preventDefault();
+        const scaleBy = 1.05;
+        const stage = e.target.getStage();
+        const oldScale = stage.scaleX();
+        const pointer = stage.getPointerPosition();
 
-      {tooltipData && (
-  <Tooltip x={tooltipPos.x} y={tooltipPos.y} data={tooltipData} id_posidata={tooltipPos.id}/>
-)}
-    </Container>
+        const newScale = e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
+        stage.scale({ x: newScale, y: newScale });
+
+        const mousePointTo = {
+          x: (pointer.x - stage.x()) / oldScale,
+          y: (pointer.y - stage.y()) / oldScale,
+        };
+        const newPos = {
+          x: pointer.x - mousePointTo.x * newScale,
+          y: pointer.y - mousePointTo.y * newScale,
+        };
+
+        stage.position(newPos);
+        stage.batchDraw();
+      }}
+    >
+      {/* Capa base */}
+      <Layer>
+        {/* Aquí pueden ir elementos de fondo si los necesitas */}
+      </Layer>
+
+      {/* Capas de imágenes individuales */}
+      {images
+        .filter((item) => {
+          const itemData = imagesData.find((data) => data.id === item.id);
+          const isVisible = itemData?.categoria === "VACIO" || !hiddenCategories[itemData?.categoria];
+          return isVisible;
+        })
+        .map((item) => (
+          <Layer 
+            key={`layer-${item.id}`}
+            ref={node => {
+              layerRefs.current[item.id] = node;
+            }}
+          >
+            <KonvaImage
+              ref={(node) => {
+                imageRefs.current[item.id] = node;
+              }}
+              key={item.id}
+              x={imagesData.find((data) => data.id === item.id)?.x || 0}
+              y={imagesData.find((data) => data.id === item.id)?.y || 0}
+              width={imagesData.find((data) => data.id === item.id)?.width || 100}
+              height={imagesData.find((data) => data.id === item.id)?.height || 100}
+              image={item.image}
+              onClick={() => handleImageClick(item.id)}
+              draggable={isDraggable}
+              onTransformEnd={(e) => handleDragEnd(item.id, e)}
+              onDblClick={() => handledabrir(item.id, item.image)}
+              onDragEnd={(e) => handleDragEnd(item.id, e)}
+            />
+          </Layer>
+        ))}
+
+      {/* Capa del transformer */}
+      <Layer>
+        <Transformer
+          ref={transformerRef}
+          boundBoxFunc={(oldBox, newBox) => ({
+            ...newBox,
+            width: Math.max(10, newBox.width),
+            height: Math.max(10, newBox.height)
+          })}
+        />
+      </Layer>
+    </Stage>
+  )}
+
+  {isFpalco && (
+    <ModalOverlay>
+      <ModalContent style={{ maxHeight: '500px', maxWidth: '700px' }}>
+        <Fpalcos onClose={handledclosed} id_posicionespalco={id_posicionespalco} link={linkimagen} />
+      </ModalContent>
+    </ModalOverlay>
+  )}
+
+  {tooltipData && (
+    <Tooltip x={tooltipPos.x} y={tooltipPos.y} data={tooltipData} id_posidata={tooltipPos.id}/>
+  )}
+</Container>
   );
 };
 

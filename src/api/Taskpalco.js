@@ -35,3 +35,6 @@ export const palcoeditarocupadoTask= async (data)=>
 
 export const palcoCategoryMostrarPorid_evento= async (id)=>
     await axios.get(`${ip}/api/palco/mostrar/categoria/poridevento/${id}`);
+
+export const palcocategoriaconfigurarocupada= async (id)=>
+    await axios.get(`${ip}/api/palco/categoria/a/configurar/ocupados/${id}`);

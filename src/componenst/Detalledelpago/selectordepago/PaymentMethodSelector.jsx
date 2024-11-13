@@ -1,41 +1,32 @@
 import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import { CreditCard, Wallet, Building2, Shield, Check, ChevronRight, Star } from 'lucide-react';
-import {  detalleEditarEstadoComprado, detallemostrarid_detalleAocupar } from '../../../api/Taskdetalle';
-import { useStoreEncryp } from '../../../useUserStore';
-import { palcoeditarocupadoTask } from '../../../api/Taskpalco';
-
+import { CreditCard, Wallet, Building2, ChevronRight, ShoppingCart, Sparkles } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+const gradient = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
 
 const float = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-15px) rotate(2deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 `;
 
 const shine = keyframes`
-  0% { background-position: -100% 0; }
-  100% { background-position: 200% 0; }
+  to {
+    background-position: 200% center;
+  }
 `;
 
 const Container = styled.div`
   min-height: 100vh;
-  background: #1e1e1e;
-  padding: 3rem 1.5rem;
-  color: #fff;
+  background: transparent;
+  padding: 2rem;
+  color: white;
   position: relative;
   overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at center, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
-    animation: ${float} 15s infinite ease-in-out;
-  }
 `;
 
 const Wrapper = styled.div`
@@ -45,373 +36,241 @@ const Wrapper = styled.div`
   z-index: 1;
 `;
 
-const HeaderSection = styled.div`
+const Header = styled.div`
   text-align: center;
   margin-bottom: 4rem;
   position: relative;
 `;
-// En el styled component que usa background-clip
+
 const Title = styled.h1`
-  font-size: 3.5rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #fff 0%, #6366f1 100%);
-  background-clip: text;
+  font-size: 4rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, #FF3366, #FF0000, #FF3366);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: transparent; // Respaldo para navegadores que no soportan -webkit-text-fill-color
+  animation: ${shine} 3s linear infinite;
   margin-bottom: 1rem;
-  letter-spacing: -1px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 `;
 
-const PaymentGrid = styled.div`
+const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+`;
+
+const glowAnimation = keyframes`
+  0% { box-shadow: 0 0 5px rgba(255, 51, 102, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(255, 51, 102, 0.8); }
+  100% { box-shadow: 0 0 5px rgba(255, 51, 102, 0.5); }
 `;
 
 const PaymentCard = styled.div`
-  position: relative;
+  background: rgba(20, 20, 20, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
   padding: 2rem;
-  border-radius: 24px;
   cursor: pointer;
+  border: 2px solid ${props => props.selected ? '#FF3366' : 'transparent'};
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  background: ${props => props.selected ? '#2a2a2a' : '#242424'};
-  border: 1px solid ${props => props.selected ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)'};
-  transform-style: preserve-3d;
-  transform: ${props => props.selected ? 'scale(1.02) translateY(-10px)' : 'scale(1)'};
-  
+  position: relative;
+  overflow: hidden;
+  animation: ${props => props.selected ? glowAnimation : 'none'} 2s infinite;
+
+  &:hover {
+    transform: translateY(-5px) scale(1.02);
+    background: rgba(30, 30, 30, 0.9);
+  }
+
   &::before {
     content: '';
     position: absolute;
-    inset: -1px;
-    border-radius: 24px;
-    padding: 1px;
-    background: ${props => {
-      switch(props.methodId) {
-        case 'instant': return 'linear-gradient(135deg, #34d399 0%, transparent 50%)';
-        case 'card': return 'linear-gradient(135deg, #6366f1 0%, transparent 50%)';
-        case 'cash': return 'linear-gradient(135deg, #f97316 0%, transparent 50%)';
-        case 'financing': return 'linear-gradient(135deg, #a855f7 0%, transparent 50%)';
-        default: return 'transparent';
-      }
-    }};
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background: radial-gradient(circle, rgba(255,51,102,0.1) 0%, transparent 70%);
+    transition: all 0.5s ease;
     opacity: ${props => props.selected ? 1 : 0};
-    transition: opacity 0.4s ease;
-  }
-
-  &:hover {
-    transform: scale(1.02) translateY(-5px);
-    background: #2a2a2a;
   }
 `;
 
-const IconWrapper = styled.div`
-  width: 60px;
-  height: 60px;
+const IconContainer = styled.div`
+  width: 70px;
+  height: 70px;
+  border-radius: 20px;
+  background: ${props => props.selected ? 
+    'linear-gradient(135deg, #FF3366, #FF0000)' : 
+    'rgba(255, 255, 255, 0.05)'};
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${props => {
-    switch(props.methodId) {
-      case 'instant': return 'rgba(52, 211, 153, 0.1)';
-      case 'card': return 'rgba(99, 102, 241, 0.1)';
-      case 'cash': return 'rgba(249, 115, 22, 0.1)';
-      case 'financing': return 'rgba(168, 85, 247, 0.1)';
-      default: return 'rgba(255, 255, 255, 0.1)';
-    }
-  }};
-  color: ${props => {
-    switch(props.methodId) {
-      case 'instant': return '#34d399';
-      case 'card': return '#6366f1';
-      case 'cash': return '#f97316';
-      case 'financing': return '#a855f7';
-      default: return '#fff';
-    }
-  }};
-  border-radius: 20px;
   margin-bottom: 1.5rem;
-  position: relative;
   transition: all 0.3s ease;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 20px;
-    padding: 1px;
-    background: ${props => {
-      switch(props.methodId) {
-        case 'instant': return 'linear-gradient(135deg, #34d399, transparent)';
-        case 'card': return 'linear-gradient(135deg, #6366f1, transparent)';
-        case 'cash': return 'linear-gradient(135deg, #f97316, transparent)';
-        case 'financing': return 'linear-gradient(135deg, #a855f7, transparent)';
-        default: return 'transparent';
-      }
-    }};
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-  }
-`;
-
-const PaymentTitle = styled.div`
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-`;
-
-const Badge = styled.span`
-  padding: 0.5rem 1rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #34d399;
-  background: rgba(52, 211, 153, 0.1);
-  border-radius: 30px;
-  border: 1px solid rgba(52, 211, 153, 0.2);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
-
-const Features = styled.div`
-  display: grid;
-  gap: 1rem;
-  opacity: ${props => props.visible ? 1 : 0};
-  transform: translateY(${props => props.visible ? 0 : '10px'});
-  transition: all 0.3s ease;
-`;
-
-const Feature = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
+  animation: ${float} 3s ease infinite;
 
   svg {
-    color: rgba(255, 255, 255, 0.5);
+    color: ${props => props.selected ? '#fff' : '#FF3366'};
+    transition: all 0.3s ease;
+    font-size: 2rem;
   }
 `;
 
-const ActionButton = styled.button`
-  width: 100%;
-  padding: 1.5rem;
-  border: none;
-  border-radius: 16px;
-  font-size: 1.25rem;
+const MethodTitle = styled.h3`
+  font-size: 1.8rem;
   font-weight: 700;
-  cursor: ${props => props.active ? 'pointer' : 'not-allowed'};
-  background: ${props => props.active 
-    ? 'linear-gradient(135deg, #6366f1, #4f46e5)' 
-    : '#2a2a2a'};
-  color: white;
+  margin-bottom: 1rem;
+  color: ${props => props.selected ? '#FF3366' : '#fff'};
+  transition: all 0.3s ease;
+`;
+
+const MethodDescription = styled.p`
+  color: #999;
+  font-size: 1rem;
+  line-height: 1.5;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 400px;
+  margin: 0 auto;
+  position: relative;
+`;
+
+const ButtonBase = styled.button`
+  padding: 1.5rem;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
+  width: 100%;
+
+  &:hover {
+    transform: ${props => props.disabled ? 'none' : 'translateY(-2px)'};
+  }
 
   &::before {
     content: '';
     position: absolute;
-    top: 0;
+    top: -100%;
     left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.2),
-      transparent
-    );
-    transition: 0.5s;
+    width: 300%;
+    height: 300%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    transition: all 0.5s ease;
+    opacity: 0;
   }
 
   &:hover::before {
-    left: 100%;
+    opacity: 1;
   }
 `;
 
-const BackButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 1rem 2rem;
-  margin: 2rem auto 0;
-  background: #2a2a2a;
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
+const ContinueButton = styled(ButtonBase)`
+  background: ${props => props.disabled ? 
+    'rgba(255, 51, 102, 0.2)' : 
+    'linear-gradient(90deg, #FF3366, #FF0000)'};
+  color: white;
+  border: none;
+  backdrop-filter: blur(5px);
+`;
+
+const ShoppingButton = styled(ButtonBase)`
+  background: rgba(255, 51, 102, 0.1);
+  backdrop-filter: blur(5px);
+  border: 2px solid #FF3366;
+  color: #FF3366;
 
   &:hover {
-    background: #2f2f2f;
-    transform: translateY(-2px);
-  }
-
-  svg {
-    transform: rotate(180deg);
+    background: rgba(255, 51, 102, 0.2);
   }
 `;
 
-const PaymentMethodSelector = () => {
+const PaymentSelector = () => {
   const [selectedMethod, setSelectedMethod] = useState('');
-  const [hoveredMethod, setHoveredMethod] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
-  const encryptedId = useStoreEncryp((state) => state.encryptedId);
   const paymentMethods = [
     {
-      id: 'instant',
-      title: 'Pago Instantáneo',
-      icon: <Building2 size={28} />,
-      badge: 'Recomendado',
-      features: [
-        { icon: <Check size={16} />, text: 'Confirmación inmediata' },
-        { icon: <Shield size={16} />, text: 'Máxima seguridad' },
-        { icon: <Star size={16} />, text: '0% comisión' },
-        { icon: <ChevronRight size={16} />, text: 'Compatible con todos los bancos' }
-      ]
+      id: 'credit',
+      title: 'Tarjeta de Crédito o Débito',
+      icon: <CreditCard size={28} />,
+      description: '"Paga fácil y seguro con tu tarjeta de crédito o débito. Proceso cifrado de inicio a fin y tus entradas digitales llegarán a tu App al instante.'
     },
     {
-      id: 'card',
-      title: 'Tarjeta de Crédito',
-      icon: <CreditCard size={28} />,
-      features: [
-        { icon: <Check size={16} />, text: 'Todas las tarjetas' },
-        { icon: <Shield size={16} />, text: 'Protección antifraude' },
-        { icon: <Star size={16} />, text: 'MSI disponibles' },
-        { icon: <ChevronRight size={16} />, text: 'Cargo inmediato' }
-      ]
+      id: 'bank',
+      title: 'PSE',
+      icon: <Building2 size={28} />,
+      description: '"Con PSE, transfiere directamente desde tu banca en línea con total seguridad. Sin comisiones extra, confirmación inmediata y tus entradas digitales en tu correo al instante.'
     },
     {
       id: 'cash',
-      title: 'Pago en Efectivo',
+      title: 'Corresponsales bancolombia',
       icon: <Wallet size={28} />,
-      features: [
-        { icon: <Check size={16} />, text: 'Sin cuenta bancaria' },
-        { icon: <Shield size={16} />, text: 'Múltiples ubicaciones' },
-        { icon: <Star size={16} />, text: 'Hasta 48hrs para pagar' },
-        { icon: <ChevronRight size={16} />, text: 'Comprobante físico' }
-      ]
-    },
-    {
-      id: 'financing',
-      title: 'Addi',
-      icon: <Wallet size={28} />,
-      features: [
-        { icon: <Check size={16} />, text: 'Pago a cuotas' },
-        { icon: <Star size={16} />, text: 'Aprobación inmediata' },
-        { icon: <ChevronRight size={16} />, text: 'Comprobante físico' }
-      ]
+      description: 'Paga fácilmente en puntos autorizados y recibe tus entradas digitales en tu App. La comodidad de pagar en efectivo con la facilidad de entradas virtuales'
     }
   ];
-  const btnefectuarpago = async () => {
-    if (isProcessing) return;
-    
-    try {
-      setIsProcessing(true);
-      
-      const response = await detallemostrarid_detalleAocupar({id:encryptedId})
-      const detalles = response.data;
-      console.log(detalles);
-      if (!detalles || detalles.length === 0) {
-        setIsProcessing(false);
-        return;
-      }
-  
-      for (const detalle of detalles) {
-        try {
-          const data = {
-            id: detalle.id_detalle,
-            cantidad: detalle.cant,
-            id_usuario: encryptedId,
-          }
-          const response = await palcoeditarocupadoTask(data);
-        } catch (error) {
-          console.error('Error:', error);
-        }
-      }
-  const respo= await detalleEditarEstadoComprado({id:encryptedId});
-const info =respo.data;
-if (info.message==='correctamente') {
-  alert('Bien');
-}
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setIsProcessing(false);
-    }
+const btnselect=async ()=>{
+  if(selectedMethod==='credit'){
+    navigate('/pagos/tarjeta')
+
+  }else if (selectedMethod==='bank'){
+navigate('/pagos/pse');
+  }else{
+navigate('/pagos/bancolombia');
   }
+}
   return (
     <Container>
       <Wrapper>
-        <HeaderSection>
-          <Title>Metodos de pago</Title>
-        </HeaderSection>
+        <Header>
+          <Title>Método de Pago</Title>
+        </Header>
 
-        <PaymentGrid>
-          {paymentMethods.map(method => (
+        <Grid>
+          {paymentMethods.map((method) => (
             <PaymentCard
               key={method.id}
-              methodId={method.id}
               selected={selectedMethod === method.id}
               onClick={() => setSelectedMethod(method.id)}
-              onMouseEnter={() => setHoveredMethod(method.id)}
-              onMouseLeave={() => setHoveredMethod(null)}
             >
-              <IconWrapper methodId={method.id}>
+              <IconContainer selected={selectedMethod === method.id}>
                 {method.icon}
-              </IconWrapper>
-              
-              <PaymentTitle>
+              </IconContainer>
+              <MethodTitle selected={selectedMethod === method.id}>
                 {method.title}
-                {method.badge && (
-                  <Badge>
-                    <Star size={12} />
-                    {method.badge}
-                  </Badge>
-                )}
-              </PaymentTitle>
-
-              <Features visible={hoveredMethod === method.id || selectedMethod === method.id}>
-                {method.features.map((feature, index) => (
-                  <Feature key={index}>
-                    {feature.icon}
-                    {feature.text}
-                  </Feature>
-                ))}
-              </Features>
+              </MethodTitle>
+              <MethodDescription>{method.description}</MethodDescription>
             </PaymentCard>
           ))}
-        </PaymentGrid>
+        </Grid>
 
-        <ActionButton 
-  active={selectedMethod !== '' && !isProcessing} 
-  onClick={btnefectuarpago}
->
-  {isProcessing ? 'Procesando...' : 'Finalizar Pago'}
-</ActionButton>
-
-        <BackButton onClick={() => { window.scrollTo(0, 0); navigate(-1); }}>
-          <ChevronRight size={20} />
-          Continuar comprando
-        </BackButton>
+        <ButtonContainer>
+          <ContinueButton onClick={btnselect} disabled={!selectedMethod}>
+            <Sparkles size={20} />
+            Finalizar Compra
+            <ChevronRight size={20} />
+          </ContinueButton>
+          
+          <ShoppingButton>
+            <ShoppingCart size={20} />
+            Seguir Comprando
+          </ShoppingButton>
+        </ButtonContainer>
       </Wrapper>
     </Container>
   );
 };
 
-export default PaymentMethodSelector;
+export default PaymentSelector;

@@ -14,6 +14,9 @@ export const posicionesmostrarporcliente= async (id)=>
 export const posicioneseliminar= async (data)=>
     await axios.post(`${ip}/api/posiciones/delete`,data);
 
+export const posicionocupadainsertarApi= async (data)=>
+    await axios.post(`${ip}/api/posicionocupdatada/insertar`,data);
+
 
 
 

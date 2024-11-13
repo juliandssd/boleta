@@ -172,6 +172,7 @@ const ModernEventComponent = ({ event,initialLocation }) => {
   const [location, setLocation] = useState(initialLocation || "");
   const [originalLocation, setOriginalLocation] = useState(initialLocation || ""); 
   const { conciertoId } = useConciertoStore();
+  const { setConciertoId } = useConciertoStore();
   const navigate = useNavigate();
   const { setEventId } = useEventStore();
   const handleEditClick = () => {
@@ -219,6 +220,7 @@ infoevent();
   const pagemapa= () =>{
     try {
       setEventId(event.id_eventos)
+      setConciertoId(event.id_eventos);
       window.scrollTo(0, 0);      
       navigate('/perfil/empresario/mapa');
     } catch (error) {

@@ -9,7 +9,7 @@ import { useConciertoStore } from '../../../useUserStore';
 import PriceList from '../CategoryPalco/Categoryinfopalco';
 import ColorPicker from '../Detectarcolor/ColorPicker';
 import TablaDePrecioE from '../Listprecio/TablaDePrecio';
-
+import SeleccionarImagenOcupada from '../ComponentSeleccionarImagenOcupada/SeleccionarImagenOcupada';
 
 
 // En CircleMap.js, ajusta `MainContainer` y `PriceAndSeatMapContainer`:
@@ -95,7 +95,9 @@ const {conciertoId}=useConciertoStore();
         <StyledSeatMapConfiguration setinfoposicion={setinfoposicion}  objects={objects} />
         <StyledPriceList />
         <ColorPicker/>
+        
       </PriceAndSeatMapContainer>
+      <SeleccionarImagenOcupada/>
      <TablaDePrecioE/>
     </MainContainer>
   );

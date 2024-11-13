@@ -111,7 +111,7 @@ const NavLink = styled.a`
   font-size: 0.95rem;
   letter-spacing: 0.3px;
   transition: all 0.3s ease;
-
+  cursor: pointer;
   &:before {
     content: '';
     position: absolute;
