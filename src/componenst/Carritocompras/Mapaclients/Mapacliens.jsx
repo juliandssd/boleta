@@ -202,70 +202,81 @@ const SeatMap = ({objects}) => {
   return (
     <Container>
      {isMobile ? (
-     <PanZoomContainer className={isInteracting ? 'interacting' : ''}>
-       <PanZoom
-            minZoom={0.5}
-            maxZoom={1}
-            enableTouch
-            enableZoom
-            defaultZoom={5} 
-            zoomSpeed={0.15} // Reducido de 0.3 a 0.15 para un zoom más suave
-            zoomInSteps={100} // Más pasos para un zoom más granular
-            zoomOutSteps={100}
-            autoCenter
-            onPanStart={handlePanStart}
-            onPanEnd={handlePanEnd}
-            onZoomStart={handlePanStart}
-            onZoomEnd={handlePanEnd}
-            style={{ width: '100%', height: '100%' }}
-            transformStyle="preserve-3d" // Mejora el rendimiento de las transformaciones
-            enableTransition // Habilita transiciones suaves
-            pinchEnabled={true} // Asegura que el pinch zoom esté habilitado
-            pinchZoomSpeed={0.15} // Velocidad del pinch zoom
-            smoothScaling // Habilita el escalado suave
-            centerZoomedOut
-            bounces={false}
-          >
-            <Stage
-              width={1000}
-              height={1000}
-              x={-150}
-              y={200}
-              draggable={isDraggable}
-              scaleX={1}
-              scaleY={1}
-              pixelRatio={2}
-            >
-              <Layer>
-                {images
-                  .filter((item) => {
-                    const itemData = imagesData.find((data) => data.id === item.id);
-                    const isVisible = !hiddenCategories[itemData?.categoria];
-                    return isVisible;
-                  })
-                  .map((item) => {
-                    const itemData = imagesData.find((data) => data.id === item.id);
-                    const isSelected = item.id === selectedImageId;
-                    return (
-                      <KonvaImage
-                        key={item.id}
-                        x={itemData?.x || 0}
-                        y={itemData?.y || 0}
-                        width={itemData?.width || 100}
-                        height={itemData?.height || 100}
-                        image={item.image}
-                        onTap={() => handleImageDoubleClick(item.id, itemData?.categoria,itemData?.estado)}
-                        onMouseEnter={handleMouseEnter}
-                        opacity={isSelected ? 0.300 : 1}
-                        onMouseLeave={handleMouseLeave}
-                        {...getSelectedStyle(item.id)}
-                      />
-                    );
-                  })}
-              </Layer>
-            </Stage>
-          </PanZoom>
-        </PanZoomContainer>
+      <PanZoomContainer className={isInteracting ? 'interacting' : ''}>
+      <PanZoom
+        minZoom={0.5}
+        maxZoom={1}
+        enableTouch
+        enableZoom
+        defaultZoom={5}
+        zoomSpeed={0.6} // Reducido para mayor suavidad
+        zoomInSteps={150} // Aumentado para más granularidad
+        zoomOutSteps={150}
+        autoCenter={true}
+        zoomOrigin="center"        // Cambiado de "cursor" a "center"
+        centerContent={true}        // Cambiar de true a false         // Cambiar de true a false
+        onPanStart={handlePanStart}
+        onPanEnd={handlePanEnd}
+        onZoomStart={handlePanStart}
+        onZoomEnd={handlePanEnd}
+        style={{ 
+          width: '100%', 
+          height: '100%',
+          willChange: 'transform',
+          transformOrigin: 'center', 
+          position: 'relative',
+          overflow: 'hidden'// Mejora el rendimiento de transformaciones
+        }}
+        transformStyle="preserve-3d"
+
+        enableTransition
+        pinchEnabled={true}
+        initialPositionX={0}      // Añadir esto
+        initialPositionY={0} 
+        pinchZoomSpeed={0.6} // Reducido para que coincida con zoomSpeed
+        smoothScaling
+        bounces={false}
+      >
+        <Stage
+          width={1000}
+          height={1000}
+          x={-150}
+          y={200}
+          draggable={isDraggable}
+          scaleX={1}
+          scaleY={1}
+          pixelRatio={2}
+        >
+          <Layer>
+            {images
+              .filter((item) => {
+                const itemData = imagesData.find((data) => data.id === item.id);
+                const isVisible = !hiddenCategories[itemData?.categoria];
+                return isVisible;
+              })
+              .map((item) => {
+                const itemData = imagesData.find((data) => data.id === item.id);
+                const isSelected = item.id === selectedImageId;
+                return (
+                  <KonvaImage
+                    key={item.id}
+                    x={itemData?.x || 0}
+                    y={itemData?.y || 0}
+                    width={itemData?.width || 100}
+                    height={itemData?.height || 100}
+                    image={item.image}
+                    onTap={() => handleImageDoubleClick(item.id, itemData?.categoria,itemData?.estado)}
+                    onMouseEnter={handleMouseEnter}
+                    opacity={isSelected ? 0.300 : 1}
+                    onMouseLeave={handleMouseLeave}
+                    {...getSelectedStyle(item.id)}
+                  />
+                );
+              })}
+          </Layer>
+        </Stage>
+      </PanZoom>
+    </PanZoomContainer>
       ) : (
         <Stage
           width={window.innerWidth}

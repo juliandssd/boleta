@@ -76,6 +76,7 @@ const EmptyComponent = () => {
   useEffect(() => {
     const getEvent = async () => {
       try {
+        console.log(autor);
         const responid= await eventomostraridporelnombre({id:autor});
         if(responid.data.id_eventos){
           setConciertoId(responid.data.id_eventos)
@@ -85,7 +86,7 @@ const EmptyComponent = () => {
   
        
       } catch (error) {
-        console.log
+        console.log(error);
       } finally {
         setLoading(false);
       }
