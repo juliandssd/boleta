@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { eventopublicarpublicidadprincipal } from '../../../api/TaskEvento';
-
+import { useNavigate } from 'react-router-dom';
 const CarouselContainer = styled.div`
   width: 95vw;
   height: 450px;
@@ -238,6 +238,7 @@ const Dot = styled.button`
 const Carousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [images, setImages] = useState([]);
+  const navigate = useNavigate();
   const [dragState, setDragState] = useState({
     isDragging: false,
     startPos: 0,
@@ -251,11 +252,14 @@ const Carousel = () => {
     const fetchImages = async () => {
       try {
         const response = await eventopublicarpublicidadprincipal();
+        console.log(response.data);
         if (mounted) {
           setImages(response.data.map((item) => ({
+            id:item.id_eventos,
             img: item.img,
             title: item.nombre,
-            date: "SAB 09 NOV",
+            Nombredelevento:item.nombre,
+            date: item.fecha_formateada,
             description: `Noche de humor con los mejores humoristas y comediantes del país, quienes estarán en ${item.ciudad}.`
           })));
         }
@@ -330,7 +334,9 @@ const Carousel = () => {
     onTouchMove: (e) => handleDragMove(e.touches[0].clientX),
     onTouchEnd: handleDragEnd
   };
-
+const btnreserva =(item)=>{
+  navigate(`evento/${item}`); 
+}
   return (
     <CarouselContainer {...eventHandlers}>
       <CarouselWrapper
@@ -346,14 +352,14 @@ const Carousel = () => {
               <ImageOverlay>
                 <EventTitle>{item.title}</EventTitle>
                 <EventDate>{item.date}</EventDate>
-                <BuyButton>Reservar Ahora</BuyButton>
+                <BuyButton onClick={()=>btnreserva(item.Nombredelevento)}>Reservar Ahora</BuyButton>
               </ImageOverlay>
             </ImageSection>
             <ContentSection>
               <EventTitle>{item.title}</EventTitle>
               <EventDate>{item.date}</EventDate>
               <EventDescription>{item.description}</EventDescription>
-              <BuyButton>Reservar Ahora</BuyButton>
+              <BuyButton onClick={()=>btnreserva(item.Nombredelevento)}>Reservar Ahora</BuyButton>
             </ContentSection>
           </CarouselItem>
         ))}

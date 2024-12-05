@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { palcoprecio } from '../../../api/Taskpalco';
 import { useSelectedIdStore, useStore, useStoreEncryp } from '../../../useUserStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 import { usuariobloqueadoactualizarbloqueo, usuariobloqueadoMostrarminutos, usuariobloqueadosinsertar, usuariovalidaridsiexiste } from '../../../api/Taskusuario';
 import { detalleinsertar } from '../../../api/Taskdetalle';
 import { createCartAnimation } from './createCartAnimation';
@@ -166,37 +166,71 @@ const NameContainer = styled.div`
   }
 `;
 const Button = styled.button`
-  background-color: #ff4b4b;
-  color: #ffffff;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 10px;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-  width: 100%;
-  position: relative;
-  overflow: hidden; /* Importante para la animación */
-  transition: all 0.2s ease;
+ background: linear-gradient(45deg, #ff4b4b, #ff6b6b);
+ color: white;
+ padding: 12px 25px;
+ border: none;
+ border-radius: 10px;
+ font-weight: bold;
+ font-size: 16px;
+ cursor: pointer;
+ width: 100%;
+ position: relative;
+ overflow: hidden;
+ transition: all 0.3s ease;
+ 
+ &:disabled {
+   opacity: 0.7;
+   cursor: not-allowed;
+ }
 
-  &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(255, 75, 75, 0.6);
-  }
+ &::before {
+   content: '';
+   position: absolute;
+   top: 0;
+   left: -100%;
+   width: 100%;
+   height: 100%;
+   background: linear-gradient(
+     120deg,
+     transparent,
+     rgba(255, 255, 255, 0.3),
+     transparent
+   );
+   animation: shine 1.5s infinite linear;
+ }
 
-  /* Ajuste para pantallas más grandes */
-  @media (min-width: 768px) {
-    width: auto;
-    padding: 10px 20px;
-  }
+ &:hover:not(:disabled) {
+   transform: translateY(-2px);
+   box-shadow: 0 7px 14px rgba(255, 75, 75, 0.3);
+ }
+
+ &:active:not(:disabled) {
+   transform: translateY(1px);
+ }
+
+ @keyframes shine {
+   100% {
+     left: 200%;
+   }
+ }
+
+ @media (min-width: 768px) {
+   width: auto;
+   min-width: 200px;
+ }
 `;
+
 const TicketSelector = () => {
   const [quantity, setQuantity] = useState(1);
   const navigate = useNavigate();
-  const { fetchCount } = useStore();
+  const { fetchCount } = useStore();  
   const [data, setData] = useState(null);
+  const location = useLocation();
   const selectedId = useSelectedIdStore((state) => state.selectedId);
+  const setSelectedId = useSelectedIdStore((state) => state.setSelectedId);
   const encryptedId = useStoreEncryp((state) => state.encryptedId);
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     if (!selectedId) return;
 
@@ -220,36 +254,67 @@ const TicketSelector = () => {
       setQuantity((prev) => prev + 1);
     }
   };
+  useEffect(() => {
+    const resetSelectedId = () => {
+      setSelectedId(0);
+      setData(null);
+      setQuantity(1);
+    };
 
+    // Reset on mount
+    resetSelectedId();
+
+    // Reset on location change (navigation)
+    const handleNavigation = () => {
+      resetSelectedId();
+    };
+
+    // Listen for navigation events
+    window.addEventListener('popstate', handleNavigation);
+    
+    // Reset on component unmount
+    return () => {
+      resetSelectedId();
+      window.removeEventListener('popstate', handleNavigation);
+    };
+  }, [location.pathname, setSelectedId]);
   const decrementQuantity = () => {
     if (quantity > 1) {
       setQuantity((prev) => prev - 1);
     }
-  };const Confirmar = async (event) => {
+  };
+  
+  const Confirmar = async (event) => {
     event.preventDefault();
-    if (selectedId) {
-      if (encryptedId) {
-        const info = {
-          id: encryptedId,
-        };
-        try {
-          const response = await usuariovalidaridsiexiste(info);
-          if (response.data.message === "correctamente") {
-const respon= await usuariobloqueadosinsertar({id:encryptedId});
-if (respon.data.message==='correctamente') {
-  await insertar(event); // Esperar la inserción
-
-}       
-          } else {
+    
+    if (isLoading) return; // Previene múltiples clics
+    setIsLoading(true);
+  
+    try {
+      if (selectedId && encryptedId) {
+        const info = { id: encryptedId };
+        const response = await usuariovalidaridsiexiste(info);
+        
+        if (response.data.message === "correctamente") {
+          const respondata = await usuariobloqueadoactualizarbloqueo({id: encryptedId});
+          const respon = await usuariobloqueadosinsertar({id: encryptedId});
+          
+          if (respon.data.message === 'correctamente') {
+            await insertar(event);
           }
-        } catch (error) {
         }
       } else {
+        setSelectedId(0);
         window.scrollTo(0, 0);
         navigate("/login");
       }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
+
   const resetForm = () => {
     setData(null);
     setQuantity(1);
@@ -263,14 +328,13 @@ const insertar = async (event)=>{
       id_usuario:encryptedId,
       cant:quantity
     }
-
+    const respon=await usuariobloqueadoactualizarbloqueo({id:encryptedId});
+    if (respon.data.message==='correctamente') {
     const response =await usuariobloqueadoMostrarminutos({id:encryptedId});
-    const data =response.data.estado;
-    if (data==='BLOQUEADO') {
-      createBlockedAnimation(event,response.data.Faltante);
+    const data =response.data.message.estado;
+    if (data ==='BLOQUEADO') {
+      createBlockedAnimation(event,response.data.message.Faltante);
     }else{
-      const respon=await usuariobloqueadoactualizarbloqueo();
-      if (respon.data.message==='correctamente') {
       const response= await detalleinsertar(info);
       if (response.data.message !=='INGRESADO') {
         createCartAnimation(event);   
@@ -281,7 +345,7 @@ const insertar = async (event)=>{
     }
   
   } catch (error) {
-
+console.log(error);
   }
 }
   return (
@@ -306,12 +370,16 @@ const insertar = async (event)=>{
           <TicketSVG /> {/* Icono del ticket */}
           Ubicaciones agregadas a la cesta
         </div>
-        <Button  
-  onClick={(e) => {  
-    Confirmar(e);
-  }}
-  
-  >AÑADIR A LA CESTA</Button>
+        <Button
+  onClick={(e) => Confirmar(e)}
+  disabled={isLoading}
+>
+  {isLoading ? (
+    <span>Procesando...</span>
+  ) : (
+    <span>AÑADIR A LA CESTA</span>
+  )}
+</Button>
       </TicketStyleContainer>
     </Container>
   );

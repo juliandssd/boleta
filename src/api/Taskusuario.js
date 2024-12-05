@@ -22,11 +22,17 @@ export const usuarioinsertar= async (data)=>
 
 export const usuarioverificarcodigo= async (data)=>
     await axios.post(`${ip}/api/usuario/verificar/codigo`,data);
+
+
 export const usuarioverificar= async (data)=>
     await axios.post(`${ip}/api/usuario/verificar`,data);
 
 
+export const usuariomostrarporid= async (data)=>
+    await axios.post(`${ip}/api/usuario/mostrar/usuario/por/id`,data);
 
+export const usuariobloqueadoBloquear= async (data)=>
+    await axios.post(`${ip}/api/usuariobloqueado/bloquear`,data);
 
 
 

@@ -39,14 +39,14 @@ const ModernCountdownTimer = () => {
   const [countdown, setCountdown] = useState(0 * 60); // 15 minutes in seconds
 const info=async ()=>{
   try {
-    const respon=await usuariobloqueadoactualizarbloqueo();
+    const respon=await usuariobloqueadoactualizarbloqueo({id:encryptedId});
     if (respon.data.message==='correctamente') {
       const response =await usuariobloqueadoMostrarminutos({id:encryptedId});
-      if (response.data.estado==='BLOQUEADO') {
+      if (response.data.message.estado==='BLOQUEADO') {
         const responde= await detalleeliminar({id:encryptedId});
         navigate('/',{replace:true});
       }else{
-        const  data =response.data.minutos_restantes;
+        const  data =response.data.message.minutos_restantes;
         setCountdown(data* 60);
       }
    

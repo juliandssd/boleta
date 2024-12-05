@@ -258,7 +258,7 @@ const DetailRow = styled.div`
 `;
 
 const EventCode = styled.span`
-  color: #FF3333;
+  color: white;
   font-size: 0.9rem;
   font-weight: 600;
   background: rgba(255, 0, 0, 0.1);
@@ -281,8 +281,7 @@ const EventCode = styled.span`
 `;
 
 const PriceSection = styled.div`
-  margin-top: 2rem;
-  padding: 2rem;
+
   background: rgba(30, 30, 30, 0.6);
   border-radius: 20px;
   border: 1px solid rgba(255, 0, 0, 0.1);
@@ -516,15 +515,17 @@ const OrderConfirmation = () => {
                   {event.Fecha}
                 </DetailRow>
                 <EventCode>{event.Artista}</EventCode>
-              </EventDetails>
-            </EventContainer>
-
-            <PriceSection>
+                <PriceSection>
               <PriceRow>
                 <span>Entradas (x{event.Xpersona})</span>
                 <span>COP ${event.precio.toLocaleString()}</span>
               </PriceRow>
             </PriceSection>
+              </EventDetails>
+              
+            </EventContainer>
+
+        
           </React.Fragment>
         ))}
 

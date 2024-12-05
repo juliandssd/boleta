@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { User, Mail, Lock, IdCard, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, IdCard, Loader2,Phone } from 'lucide-react';
 import { enviocorreo } from '../../api/Taskenviocorreo';
 import { useNavigate } from 'react-router-dom';
 import { useidcreate } from '../../useUserStore';
@@ -11,6 +11,7 @@ const RegisterForm = () => {
   const setidcreate = useidcreate((state) => state.setidcreate);
   const [formData, setFormData] = useState({
     email: '',
+    Number:'',
     password: '',
     name: '',
     lastName: '',
@@ -32,6 +33,15 @@ const RegisterForm = () => {
       alert('Debes aceptar los términos y condiciones');
       return;
     }
+    if (!formData.Number || formData.Number.length !== 10 || formData.Number[0] !== '3') {
+      alert('Ingresa un número de celular válido (10 dígitos comenzando con 3)');
+      return;
+    }
+    if (!formData.documentId || formData.documentId.length < 5) {
+      alert('El número de documento debe tener al menos 5 dígitos');
+      return;
+    }
+  
 
     setIsLoading(true);
     try {
@@ -40,16 +50,17 @@ const RegisterForm = () => {
         p_apellido: formData.lastName,
         p_identificacion: formData.documentId,
         p_correo: formData.email,
-        p_password: formData.password
+        p_password: formData.password,
+        p_number:formData.Number
       };
       const response = await enviocorreo(data);
+
       if (response.data.message === 'correctamente') {
-    
+    console.log(response.data);
         setidcreate(response.data.encryptedIdd);
         navigate('/verify/number');
       }
     } catch (error) {
- console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -124,7 +135,20 @@ const RegisterForm = () => {
               minLength={8}
             />
           </InputGroup>
-
+          <InputGroup>
+            <InputLabel>
+              <Phone size={20} color="#ff4747" />
+              <LabelText>Número de celular</LabelText>
+            </InputLabel>
+            <Input
+              type="number"
+              name="Number"
+              placeholder="Ej: 3217819810"
+              value={formData.Number}
+              onChange={handleChange}
+              required
+            />
+          </InputGroup>
           <InputGroup>
             <InputLabel>
               <IdCard size={20} color="#ff4747" />

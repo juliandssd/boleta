@@ -1,7 +1,7 @@
 import axios  from "axios";
 export const ip=
 //"http://192.168.1.104:3001";
-"https://boleta-juliandssds-projects.vercel.app";
+"https://boleta-pb4pq6ps0-juliandssds-projects.vercel.app";
 
 export const Insertarsvg= async (data)=>
     await axios.post(`${ip}/api/archivos`,data);

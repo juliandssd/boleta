@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
-import { CreditCard, AlertCircle, Clock, Lock, ChevronRight, Wallet } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CreditCard, AlertCircle, Clock, Lock, ChevronRight, ChevronLeft,Wallet ,DollarSign,CheckCircle  } from 'lucide-react';
 import { handleTokenizeCard } from './tokenizeCard';
-
+import { useidusuariodetallepago } from '../../../useUserStore';
+import { detallesumporconfirmar } from '../../../api/Taskdetalle';
 
 const float = keyframes`
   0%, 100% { transform: translateY(0px); }
@@ -18,6 +20,20 @@ const shine = keyframes`
   to {
     background-position: 200% center;
   }
+`;
+
+// Nuevo componente para la advertencia
+const WarningMessage = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  border-radius: 12px;
+  color: #eab308;
+  margin-bottom: 24px;
+  animation: ${slideUp} 0.3s ease;
 `;
 
 const Container = styled.div`
@@ -107,7 +123,7 @@ const Input = styled.input`
   color: #ffffff;
   font-size: 15px;
   transition: border-color 0.3s ease, background 0.3s ease;
-  box-sizing: border-box; /* Evita que el borde agrande el input */
+  box-sizing: border-box;
 
   &::placeholder {
     color: #52525b;
@@ -129,7 +145,6 @@ const Input = styled.input`
   }
 `;
 
-
 const ButtonContainer = styled.div`
   margin-top: 32px;
   animation: ${slideUp} 0.5s ease backwards;
@@ -139,12 +154,10 @@ const ButtonContainer = styled.div`
 const Button = styled.button`
   width: 100%;
   padding: 16px;
-  background: linear-gradient(
-    90deg,
-    #dc2626,
-    #ef4444,
-    #dc2626
-  );
+  background: ${props => props.success ? 
+    'linear-gradient(90deg, #22c55e, #16a34a, #22c55e)' : 
+    'linear-gradient(90deg, #dc2626, #ef4444, #dc2626)'
+  };
   background-size: 200% auto;
   border: none;
   border-radius: 12px;
@@ -177,9 +190,8 @@ const Button = styled.button`
   svg {
     transition: transform 0.3s ease;
   }
-
   &:hover:not(:disabled) svg {
-    transform: translateX(4px);
+    transform: ${props => props.success ? 'translateX(-4px)' : 'translateX(4px)'};
   }
 `;
 
@@ -194,6 +206,32 @@ const SecurityBadge = styled.div`
   animation: ${slideUp} 0.5s ease backwards;
   animation-delay: 0.5s;
 `;
+const TotalAmount = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-bottom: 24px;
+  animation: ${slideUp} 0.5s ease backwards;
+`;
+
+const TotalLabel = styled.span`
+  color: #a1a1aa;
+  font-size: 14px;
+  font-weight: 500;
+`;
+
+const Amount = styled.span`
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
 
 const ErrorMessage = styled.div`
   display: flex;
@@ -207,6 +245,19 @@ const ErrorMessage = styled.div`
   margin-bottom: 24px;
   animation: ${slideUp} 0.3s ease;
 `;
+const SuccessMessage = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 12px;
+  color: #22c55e;
+  margin-bottom: 24px;
+  animation: ${slideUp} 0.3s ease;
+`;
+
 
 const PaymentForm = () => {
   const [formData, setFormData] = useState({
@@ -218,20 +269,59 @@ const PaymentForm = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(350);
-
+  const [success, setSuccess] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(360);
+  const { idusuariodetallepago } = useidusuariodetallepago();
+  const [total,settotal] = useState(0);
+  const navigate = useNavigate();
   useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      const message = '¿Estás seguro? Los datos del formulario se perderán si recargas la página.';
+      e.preventDefault();
+      e.returnValue = message;
+      return message;
+    };
+   
+    window.addEventListener('beforeunload', handleBeforeUnload);
+   
     if (timeLeft === 0) {
       setError('Session expired. Please refresh to start again.');
       return;
     }
+   
+    let timer;
+    if (!success) {
+      timer = setInterval(() => {
+        if (success) {
+          setTimeLeft(0);
+          clearInterval(timer);
+        } else {
+          setTimeLeft(prev => prev - 1);
+        }
+      }, 1000);
+    } else {
+      setTimeLeft(0);
+    }
+   
+    return () => {
+      if (timer) clearInterval(timer);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+   }, [timeLeft, success]); // Add success to dependencies
+  
 
-    const timer = setInterval(() => {
-      setTimeLeft(prev => prev - 1);
-    }, 1000);
+  useEffect(()=>{
+const Fetdata =async ()=>{
+  try {
+    const response =  await detallesumporconfirmar({id:idusuariodetallepago});
+    settotal(response.data.Monto);
+  } catch (error) {
+  }
+}
+Fetdata();
+  }
 
-    return () => clearInterval(timer);
-  }, [timeLeft]);
+  ,[])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -265,9 +355,19 @@ const PaymentForm = () => {
     }
 
     setLoading(true);
+    setSuccess(false);
+    setError('');
+
     try {
-      await handleTokenizeCard(formData, setError, setLoading);
+      const result = await handleTokenizeCard(formData, setError, setLoading, idusuariodetallepago);
+      if (result) {
+        setSuccess(true);
+        setError('');
+      } else {
+        setError('Lo sentimos, no pudimos procesar tu pago en este momento.');
+      }
     } catch (err) {
+      setSuccess(false);
       setError('Error en el proceso de pago');
     } finally {
       setLoading(false);
@@ -279,11 +379,21 @@ const PaymentForm = () => {
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
-
+  const formatNumber = (number) => {
+    return new Intl.NumberFormat('es-CO').format(number);
+  };
+  const handleBack = () => {
+    navigate('/'); // Ajusta esta ruta según tu necesidad
+  };
   return (
     <Container>
       <Card>
         <FormContainer>
+          <WarningMessage>
+            <AlertCircle size={20} />
+            ¡Atención! Si recargas la página perderás todos los datos ingresados.
+          </WarningMessage>
+
           <Header>
             <Title>
               <Wallet size={24} color="#dc2626" />
@@ -294,12 +404,25 @@ const PaymentForm = () => {
               {formatTimeLeft(timeLeft)}
             </Timer>
           </Header>
-
+          <TotalAmount>
+            <TotalLabel>Total a pagar:</TotalLabel>
+            <Amount>
+              <DollarSign size={20} color="#dc2626" />
+              {formatNumber(total)} COP
+            </Amount>
+          </TotalAmount>
           {error && (
             <ErrorMessage>
               <AlertCircle size={20} />
               {error}
             </ErrorMessage>
+          )}
+
+          {success && (
+            <SuccessMessage>
+              <CheckCircle size={20} />
+              Pago exitoso. Puedes consultar tu entrada con tu usuario en la app
+            </SuccessMessage>
           )}
 
           <form onSubmit={handleSubmit}>
@@ -338,13 +461,26 @@ const PaymentForm = () => {
                 />
               </div>
             </FormGroup>
-
             <ButtonContainer>
-              <Button type="submit" disabled={loading || timeLeft === 0}>
-                {loading ? 'Processing...' : 'Pay Now'}
-                <ChevronRight size={20} />
-              </Button>
-            </ButtonContainer>
+  {(success || timeLeft === 0) ? (
+    <Button 
+      success 
+      type="button" 
+      onClick={handleBack}
+    >
+      <ChevronLeft size={20} />
+      Volver al menú principal
+    </Button>
+  ) : (
+    <Button 
+      type="submit" 
+      disabled={loading || timeLeft === 0}
+    >
+      {loading ? 'Processing...' : 'Pagar Ahora'}
+      <ChevronRight size={20} />
+    </Button>
+  )}
+</ButtonContainer>
 
             <SecurityBadge>
               <Lock size={14} />

@@ -2,10 +2,65 @@ import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { CreditCard, Wallet, Building2, ChevronRight, ShoppingCart, Sparkles } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useConciertoStore, useidusuariodetallepago, useStoreEncryp } from '../../../useUserStore';
+import { detalleeditarpedidosbancolombia, detalleporconfirmarpedido, detallepse, detalleverificarpalcodisponibilidadalpagar, detalleverificarprocesodepago } from '../../../api/Taskdetalle';
+import { usuariobloqueadoBloquear } from '../../../api/Taskusuario';
 const gradient = keyframes`
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+`;
+const loadingAnimation = keyframes`
+  0% { transform: scale(0.98); }
+  50% { transform: scale(1); }
+  100% { transform: scale(0.98); }
+`;
+
+const ButtonBase = styled.button`
+  padding: 1.5rem;
+  border-radius: 15px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+
+  &:hover {
+    transform: ${props => props.disabled ? 'none' : 'translateY(-2px)'};
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    transition: all 0.5s ease;
+    opacity: 0;
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+`;
+// Modificar el ContinueButton
+const ContinueButton = styled(ButtonBase)`
+  background: ${props => 
+    props.disabled ? 'rgba(255, 51, 102, 0.2)' : 
+    props.isLoading ? 'rgba(255, 51, 102, 0.7)' :
+    'linear-gradient(90deg, #FF3366, #FF0000)'};
+  color: white;
+  border: none;
+  backdrop-filter: blur(5px);
+  animation: ${props => props.isLoading ? loadingAnimation : 'none'} 1.5s infinite;
 `;
 
 const float = keyframes`
@@ -141,52 +196,6 @@ const ButtonContainer = styled.div`
   margin: 0 auto;
   position: relative;
 `;
-
-const ButtonBase = styled.button`
-  padding: 1.5rem;
-  border-radius: 15px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-
-  &:hover {
-    transform: ${props => props.disabled ? 'none' : 'translateY(-2px)'};
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -100%;
-    left: -100%;
-    width: 300%;
-    height: 300%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    transition: all 0.5s ease;
-    opacity: 0;
-  }
-
-  &:hover::before {
-    opacity: 1;
-  }
-`;
-
-const ContinueButton = styled(ButtonBase)`
-  background: ${props => props.disabled ? 
-    'rgba(255, 51, 102, 0.2)' : 
-    'linear-gradient(90deg, #FF3366, #FF0000)'};
-  color: white;
-  border: none;
-  backdrop-filter: blur(5px);
-`;
-
 const ShoppingButton = styled(ButtonBase)`
   background: rgba(255, 51, 102, 0.1);
   backdrop-filter: blur(5px);
@@ -201,6 +210,9 @@ const ShoppingButton = styled(ButtonBase)`
 const PaymentSelector = () => {
   const [selectedMethod, setSelectedMethod] = useState('');
   const navigate = useNavigate();
+  const encryptedId = useStoreEncryp((state) => state.encryptedId);
+  const [isLoading, setIsLoading] = useState(false);
+  const { setiddetallepago } = useidusuariodetallepago();
   const paymentMethods = [
     {
       id: 'credit',
@@ -221,16 +233,104 @@ const PaymentSelector = () => {
       description: 'Paga fácilmente en puntos autorizados y recibe tus entradas digitales en tu App. La comodidad de pagar en efectivo con la facilidad de entradas virtuales'
     }
   ];
-const btnselect=async ()=>{
-  if(selectedMethod==='credit'){
-    navigate('/pagos/tarjeta')
 
-  }else if (selectedMethod==='bank'){
-navigate('/pagos/pse');
-  }else{
-navigate('/pagos/bancolombia');
+  const verificarpalcodisponibilidad= async ()=>{
+try {
+  const response = await detalleverificarpalcodisponibilidadalpagar({id:encryptedId})
+  return response.data.id_detalle;
+} catch (error) {
+  
+}
+  }
+const detallepedidopse=async ()=>{
+  try {
+    const response =await detallepse({id:encryptedId});
+    return response.data.message;
+  } catch (error) {
+    
   }
 }
+  const detallePedidosPorconfirmar =async ()=>{
+    try {
+      const response = await detalleporconfirmarpedido({id:encryptedId});
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
+  const detallebancolombia=async ()=>{
+    try {
+      const response = await detalleeditarpedidosbancolombia({id:encryptedId});
+      return response.data;
+    } catch (error) {
+      
+    }
+  }
+  const bloquearusuario =async ()=>{
+    try {
+      const response  = await usuariobloqueadoBloquear({id:encryptedId});
+      return response.data.message;
+    } catch (error) {
+      console.log(errro);
+    }
+  }
+
+const btnverificarPago=async (_estado)=>{
+  try {
+    const response =await detalleverificarprocesodepago({id:encryptedId,estado:_estado})
+    return response.data.message;
+  } catch (error) {
+  }
+}
+
+  const btnselect = async () => {
+    if (isLoading) return; // Previene doble clic
+    
+    setIsLoading(true);
+    try {
+      setiddetallepago(encryptedId);
+      const response = await verificarpalcodisponibilidad();
+      const data = response[0].id_detalle;
+      const responsebloqueo=await bloquearusuario();
+      if (responsebloqueo==='correctamente') {
+        
+   
+      if (data === 0) {
+          if (selectedMethod === 'credit') {
+            const responseverificarpagos=await btnverificarPago('TARJETA');
+            if (responseverificarpagos===0) {
+              const respon = await detallePedidosPorconfirmar();
+              if (respon.message === 'correctamente') {
+              navigate('/pagos/tarjeta');
+              }
+            }           
+          } else if (selectedMethod === 'bank') {
+            const responseverificarpagos=await btnverificarPago('PSE');
+            if (responseverificarpagos===0) {
+            const responpse=await detallepedidopse();
+            if (responpse>0) {
+              navigate('/pagos/pse',{replace:true});
+            }
+          }
+          } else {
+            const responseverificarpagos=await btnverificarPago('BANCOLOMBIA');
+            if (responseverificarpagos===0) {
+            const responbancolombia = await detallebancolombia();
+            if (responbancolombia.message>0) {
+              navigate('/pagos/bancolombia',{replace:true});
+            }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   return (
     <Container>
       <Wrapper>
@@ -257,11 +357,21 @@ navigate('/pagos/bancolombia');
         </Grid>
 
         <ButtonContainer>
-          <ContinueButton onClick={btnselect} disabled={!selectedMethod}>
-            <Sparkles size={20} />
-            Finalizar Compra
-            <ChevronRight size={20} />
-          </ContinueButton>
+        <ContinueButton 
+  onClick={btnselect} 
+  disabled={!selectedMethod || isLoading}
+  isLoading={isLoading}
+>
+  {isLoading ? (
+    'Procesando...'
+  ) : (
+    <>
+      <Sparkles size={20} />
+      Finalizar Compra
+      <ChevronRight size={20} />
+    </>
+  )}
+</ContinueButton>
           
           <ShoppingButton>
             <ShoppingCart size={20} />

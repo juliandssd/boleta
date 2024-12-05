@@ -28,6 +28,32 @@ export const detalleeliminardefult= async (data)=>
 
 
 
+export const detalleverificarpalcodisponibilidadalpagar= async (data)=>
+    await axios.post(`${ip}/api/detalle/verificar/disponibilidad/alpagar`,data);
+
+export const detalleporconfirmarpedido= async (data)=>
+    await axios.post(`${ip}/api/detalle/por/confirmar`,data);
+
+export const detallesumporconfirmar= async (data)=>
+    await axios.post(`${ip}/api/detalle/sum/porconfirmar`,data);
+
+export const detalleconfirmarpedido = async (data) =>
+    await axios.post(`${ip}/api/detalle/confirmar/estado`, data);
+
+export const detallepse = async (data) =>
+    await axios.post(`${ip}/api/detalle/pse`, data);
+
+export const detallesumpse = async (data) =>
+    await axios.post(`${ip}/api/detalle/sum/pse`, data);
+
+export const detalleeditarpedidosbancolombia = async (data) =>
+    await axios.post(`${ip}/api/detalle/editar/bancolombia`, data);
+
+export const detallesumbancolombia = async (data) =>
+    await axios.post(`${ip}/api/detalle/sum/bancolombia`, data);
+
+export const detalleverificarprocesodepago = async (data) =>
+    await axios.post(`${ip}/api/detalle/verificar/pago`, data);
 
 
 

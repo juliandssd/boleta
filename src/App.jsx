@@ -15,6 +15,10 @@ import VerificacionCodigo from './componenst/login/Verificarnumero';
 import PaginaPago from './componenst/wompi/Tarjeta/WompiPaymentForm';
 import PSE from './componenst/wompi/Pse/PSE';
 import WompiBancolombiaPayment from './componenst/wompi/Corresponsal/WompiBancolombiaPayment';
+import ProtectedRouteDetalle from './Protectedroutepago';
+import ProtectedRoutePse from './ProtectedRoutePse';
+import Protectedroutebanoclombia from './Protectedroutebanoclombia';
+
 
 function App() {
   return (
@@ -29,16 +33,38 @@ function App() {
           <Route path='/perfilempresario' element={<LoginForm/>}/>
           <Route path='/empresario/editar/info' element={<PerfilEmpresario/>}/>
           <Route path='/verify/number' element={<VerificacionCodigo/>}/>
-          <Route path='/pagos/tarjeta' element={<PaginaPago/>}/>
-          <Route path='/pagos/pse' element={<PSE/>}/>
-          <Route path='/pagos/bancolombia' element={<WompiBancolombiaPayment/>}/>
-          {/* Ruta protegida */}
+          <Route />
+          <Route
+          path='/pagos/pse'
+          element={
+            <ProtectedRoutePse>
+          <PSE/>
+          </ProtectedRoutePse>
+        }
+          />
+          <Route
+          path='/pagos/tarjeta'
+          element={
+            <ProtectedRouteDetalle>
+          <PaginaPago/>
+          </ProtectedRouteDetalle>
+        }
+          />
           <Route 
             path='/detalle/pago' 
             element={
               <ProtectedRoute>
                 <PaymentHomePage />
               </ProtectedRoute>
+            }
+          />
+
+          <Route 
+            path='/pagos/bancolombia' 
+            element={
+              <Protectedroutebanoclombia>
+                <WompiBancolombiaPayment />
+              </Protectedroutebanoclombia>
             }
           />
           <Route path='/carrito/de/compra' element={<CarritocompraAPP/>}/>

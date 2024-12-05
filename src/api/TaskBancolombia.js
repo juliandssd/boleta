@@ -1,7 +1,5 @@
 import axios  from "axios";
-export const ip=
-"http://192.168.1.104:3000";
-//"https://boleta-juliandssds-projects.vercel.app";
+import {ip} from './Task';
 
 
 

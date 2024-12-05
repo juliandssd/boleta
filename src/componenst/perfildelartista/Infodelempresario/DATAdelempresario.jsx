@@ -160,10 +160,6 @@ const DATAdelempresario = ({ event }) => {
   const [nit, setNit] = useState(event.nit);
   const [pulep, setPulep] = useState(event.Pulep);
 
-  useEffect(() => {
-    console.log(event);
-  }, []);
-
   return (
     <MainWrapper>
       <Container>

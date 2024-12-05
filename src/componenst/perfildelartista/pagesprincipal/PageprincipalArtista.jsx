@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import AOS from 'aos';
+import { useParams } from 'react-router-dom';
 import 'aos/dist/aos.css';
-import styled, { createGlobalStyle } from 'styled-components';
+import styled, {keyframes, createGlobalStyle } from 'styled-components';
 import Pcabezeraartista from '../Cabezeradelartitas/Pcabezeraartista';
-import { eventsMostrarIdEvents } from '../../../api/TaskEvento';
+import { eventomostraridporelnombre, eventsMostrarIdEvents } from '../../../api/TaskEvento';
 import { useConciertoStore } from '../../../useUserStore';
 import Iconosdeinfo from '../IconosDeInfo/Iconosdeinfo';
 import Pplanosdelconcierto from '../Planosdelartista/Pplanosdelconcierto';
@@ -27,13 +28,34 @@ const GlobalStyle = createGlobalStyle`
     font-family: Arial, Helvetica, sans-serif;
   }
 `;
-
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
 const AppWrapper = styled.div`
   width: min(100%, 100vw);
   margin: 0 auto;
   background-color: #1e1e1e;
 `;
+const LoaderContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+`;
+const Loader = styled.div`
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 0, 0, 0.1);
+  border-top-color: #ff4444;
+  border-radius: 50%;
+  animation: ${spin} 1s linear infinite;
 
+  @media (max-width: 768px) {
+    width: 50px;
+    height: 50px;
+  }
+`;
 const Section = styled.div`
   width: 100%;
   padding: 0 1rem;
@@ -43,30 +65,40 @@ const EmptyComponent = () => {
   const [event, setEvent] = useState(null);
   const { conciertoId } = useConciertoStore();
   const [loading, setLoading] = useState(true);
-
+  const { autor } = useParams(); 
+  const {setConciertoId}= useConciertoStore();
   useEffect(() => {
     AOS.init({
       duration: 1000,
       once: true,
     });
   }, []);
-
   useEffect(() => {
     const getEvent = async () => {
       try {
-        const response = await eventsMostrarIdEvents(conciertoId);
-        setEvent(response.data);
+        const responid= await eventomostraridporelnombre({id:autor});
+        if(responid.data.id_eventos){
+          setConciertoId(responid.data.id_eventos)
+          const response = await eventsMostrarIdEvents(responid.data.id_eventos);
+          setEvent(response.data);
+        }
+  
+       
       } catch (error) {
-        console.error(error);
+        console.log
       } finally {
         setLoading(false);
       }
     };
     getEvent();
-  }, [conciertoId]);
+  }, [autor]);
 
   if (loading) {
-    return <div>Cargando...</div>;
+    return (
+      <LoaderContainer>
+        <Loader />
+      </LoaderContainer>
+    );
   }
 
   return (
@@ -92,14 +124,13 @@ const EmptyComponent = () => {
         <Section data-aos="fade-left">
           <PricingTable id={conciertoId} />
         </Section>
-
-        <Section data-aos="fade-right">
-          <TermsAndConditions />
-        </Section>
-
         <Section data-aos="fade-up">
           <DATAdelempresario event={event} />
         </Section>
+
+        <Section data-aos="fade-right">
+          <TermsAndConditions />
+        </Section>   
 
         <Section data-aos="fade-up">
           <Footer />

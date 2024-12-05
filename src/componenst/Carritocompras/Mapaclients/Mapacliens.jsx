@@ -99,7 +99,6 @@ const SeatMap = ({objects}) => {
       try {
         const response = await posicionesmostrarporcliente(conciertoId);
         const data = response.data;// Verificar datos recibidos
-        console.log(data);
         setImagesData(data);
         setdatamapaconfigurar(data); // Se asume que `data` es un array de objetos con {id, x, y, url, width, height}
       } catch (error) {
@@ -255,7 +254,7 @@ const SeatMap = ({objects}) => {
                         width={itemData?.width || 100}
                         height={itemData?.height || 100}
                         image={item.image}
-                        onDblTap={() => handleImageDoubleClick(item.id, itemData?.categoria,itemData?.estado)}
+                        onTap={() => handleImageDoubleClick(item.id, itemData?.categoria,itemData?.estado)}
                         onMouseEnter={handleMouseEnter}
                         opacity={isSelected ? 0.300 : 1}
                         onMouseLeave={handleMouseLeave}
@@ -271,7 +270,7 @@ const SeatMap = ({objects}) => {
         <Stage
           width={window.innerWidth}
           height={window.innerHeight}
-          draggable={isDraggable} 
+          draggable={true} 
           pixelRatio={1} // Configuración estándar para escritorio
           onWheel={(e) => {
             e.evt.preventDefault();
@@ -314,7 +313,7 @@ const SeatMap = ({objects}) => {
           width={itemData?.width || 100}
           height={itemData?.height || 100}
           image={item.image}
-          onDblClick={() => handleImageDoubleClick(item.id, itemData?.categoria,itemData?.estado)}
+          onClick={() => handleImageDoubleClick(item.id, itemData?.categoria,itemData?.estado)}
           //onDblClick={() => handleImageDoubleClick(item.id, itemData.categoria)}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}

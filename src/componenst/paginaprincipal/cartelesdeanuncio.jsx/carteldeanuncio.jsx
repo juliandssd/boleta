@@ -73,7 +73,7 @@ const DateContainer = styled.div`
 const Day = styled.div`
   font-size: 48px;
   font-weight: bold;
-  color: #00c6ff;
+  color: #ff4500;
   line-height: 1;
   text-align: center;
 `;
@@ -198,10 +198,10 @@ const Event = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
-const handleCompra= (id)=>{
+const handleCompra= (id,nombre)=>{
   setConciertoId(id);
   window.scrollTo(0, 0); 
-  navigate('evento/hola'); 
+  navigate(`evento/${nombre}`); 
 }
   return (
     <CardWrapper>
@@ -223,7 +223,7 @@ const handleCompra= (id)=>{
           </DateContainer>
           <City>{evento.ciudad}</City> {/* Nueva sección para la ciudad */}
           <Location>{evento.ubicaciondelevento}</Location>
-          <BuyButton onClick={()=>handleCompra(evento.id_eventos)}>Comprar Entrada</BuyButton>
+          <BuyButton onClick={()=>handleCompra(evento.id_eventos,evento.nombre)}>Comprar Entrada</BuyButton>
         </EventCard>
       ))}
     </CardWrapper>

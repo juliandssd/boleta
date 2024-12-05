@@ -76,6 +76,12 @@ export const useUserStore = create((set) => ({
     },
   }));
 
+  export const useidusuariodetallepago = create((set) => ({
+    idusuariodetallepago: '',
+    setiddetallepago: (id) => set({ idusuariodetallepago: id }),
+    cleariddetallepago: () => set({ idusuariodetallepago: '' })
+  }));
+
 
   export const usedatamapa = create((set) => ({
     datamapaconfigurar: [],

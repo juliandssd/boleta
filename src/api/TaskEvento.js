@@ -21,6 +21,10 @@ export const infoevento__editarresponsabilidades = async (data)=>
     await axios.put(`${ip}/api/infoevento/editar/responsabilidades`,data);
 
 
+export const eventomostraridporelnombre = async (data)=>
+    await axios.post(`${ip}/api/eventos/mostrar/id/por/nombre`,data);
+
+
 export const eventsMostrarIdEvents= async (id)=>
     await axios.get(`${ip}/api/infoevento/mostrar/poridvento/${id}`);
 
