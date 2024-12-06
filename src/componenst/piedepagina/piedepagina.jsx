@@ -353,14 +353,10 @@ const Footer = () => {
         <HoverGlow  className="hover-glow" style={{ transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)` }} />
         
         <MainContent>
-          <LeftSection>
-            <LogoContainer>
-              <Logo>TiketPlus</Logo>
-            </LogoContainer>
-            
+          <LeftSection>            
             <InfoCard>
               <CompanyInfo>
-                <p>Tiketplus</p>
+                <p>EventosLive</p>
                 <p>Nit 1007.676.147-1</p>
                 <p>Call Center: (60-1) 593-6300</p>
               </CompanyInfo>

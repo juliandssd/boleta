@@ -345,7 +345,6 @@ const insertar = async (event)=>{
     }
   
   } catch (error) {
-console.log(error);
   }
 }
   return (

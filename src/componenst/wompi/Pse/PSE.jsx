@@ -511,7 +511,6 @@ const PSE = () => {
       const response = await usuariomostrarporid({id: idusuariodetallepago});
       return response.data.data;
     } catch (error) {
-      console.log(error);
     }
   };
 
