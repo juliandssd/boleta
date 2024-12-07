@@ -551,7 +551,7 @@ const PSE = () => {
       }
       window.location.href = res.data.redirectUrl;
     } catch (error) {
-      console.error('Error al procesar el pago:', error);
+      console.error(error);
       setError('Error al procesar el pago. Por favor intente nuevamente.');
     } finally {
       setIsSubmitting(false);
