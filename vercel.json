@@ -1,31 +1,22 @@
 {
-  "rewrites": [
-    { 
-      "source": "/createtransaction",
-      "destination": "https://tu-backend-url.vercel.app/createtransaction"
+  "version": 2,
+  "routes": [
+    {
+      "src": "/createtransaction",
+      "methods": ["POST", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://boleta-cjrp.vercel.app",
+        "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "dest": "/api/createtransaction"
     }
   ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { 
-          "key": "Access-Control-Allow-Origin", 
-          "value": "*" 
-        },
-        { 
-          "key": "Access-Control-Allow-Methods", 
-          "value": "GET,POST,OPTIONS,PUT,DELETE" 
-        },
-        { 
-          "key": "Access-Control-Allow-Headers", 
-          "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization"
-        },
-        {
-          "key": "Access-Control-Allow-Credentials",
-          "value": "true"
-        }
-      ]
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
     }
-  ]
+  }
 }
