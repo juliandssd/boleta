@@ -280,6 +280,7 @@ const btnverificarPago=async (_estado)=>{
     const response =await detalleverificarprocesodepago({id:encryptedId,estado:_estado})
     return response.data.message;
   } catch (error) {
+    console.log(error);
   }
 }
 
