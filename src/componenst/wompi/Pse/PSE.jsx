@@ -545,6 +545,7 @@ const PSE = () => {
         _id_usuario: idusuariodetallepago
       };
       const res = await createtransaction(transactionData);
+      console.log(res);
       if (!res.data.success) {
         throw new Error(res.data.error || 'Error al procesar el pago');
       }
