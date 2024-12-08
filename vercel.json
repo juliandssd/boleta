@@ -11,12 +11,22 @@
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
         "Access-Control-Allow-Credentials": "true"
       }
-    }
-  ],
-  "rewrites": [
+    },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "^/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "^/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "^/(.+\\.[a-zA-Z]+)$",
+      "dest": "/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
